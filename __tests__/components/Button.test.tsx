@@ -12,20 +12,32 @@ describe('Button', () => {
   });
 
   it('opens the sign-in popup when the sign in button is clicked', () => {
-    render(<Button text="Sign in" />);
-    const button = screen.getByText('Sign in');
+    const text = 'Sign in';
+    render(<Button text={text} />);
+    const button = screen.getByText(text);
     fireEvent.click(button);
 
-    expect(screen.getByText('Sign in')).toBeInTheDocument();
+    expect(screen.getByText(text)).toBeInTheDocument();
     expect(signIn).toHaveBeenCalledTimes(1);
   });
-  // Opens the sign-in popup when the 'Sign In' button is clicked"
-  it('opens the sign-out popup when the sign out button is clicked ', () => {
-    render(<Button text="Sign out" />);
-    const button = screen.getByText('Sign out');
+
+  it('opens the sign-in popup when the sign in with google button is clicked', () => {
+    const text = 'Sign In With Google';
+    render(<Button text={text} />);
+    const button = screen.getByText(text);
     fireEvent.click(button);
 
-    expect(screen.getByText('Sign out')).toBeInTheDocument();
+    expect(screen.getByText(text)).toBeInTheDocument();
+    expect(signIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens the sign-out popup when the sign out button is clicked ', () => {
+    const text = 'Sign out';
+    render(<Button text={text} />);
+    const button = screen.getByText(text);
+    fireEvent.click(button);
+
+    expect(screen.getByText(text)).toBeInTheDocument();
     expect(signOut).toHaveBeenCalledTimes(1);
   });
 });

@@ -12,7 +12,7 @@ const BUTTON_CLASS =
   'p-2 h-full w-full bg-gray-50 font-medium hover:bg flex flex-col justify-center items-center hover:bg-rose-100';
 export default function Button({ text, textSize = 'text-xl', css }: Props) {
   const handleClick = () => {
-    if (text === 'Sign in') {
+    if (text === 'Sign in' || text === 'Sign In With Google') {
       signIn('google', { callbackUrl: '/' });
       return;
     }
