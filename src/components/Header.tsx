@@ -6,9 +6,13 @@ import { BsPlusSquare, BsPlusSquareFill } from 'react-icons/bs';
 import Button from './Button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 const ICON_CLASS = 'mr-6';
 export default function Header() {
+  const { data: session } = useSession();
+  const buttonText = session ? 'Sign out' : 'Sign in';
+  console.log('header, session: ', session);
   const pathname = usePathname();
   return (
     <header className="flex justify-between my-2  p-2 max-w-screen-2xl mx-auto ">
@@ -30,7 +34,7 @@ export default function Header() {
           {pathname === '/new' ? <BsPlusSquareFill /> : <BsPlusSquare />}
         </Link>
         <div className={ICON_CLASS}>
-          <Button text="Sign in" textSize="text-xl" />
+          <Button text={buttonText} textSize="text-xl" />
         </div>
       </nav>
     </header>

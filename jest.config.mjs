@@ -18,6 +18,7 @@ const config = {
   moduleNameMapper: {
     '^@/components/(.*)$': '<rootDir>/src/components/$1',
     '^@/app/(.*)$': '<rootDir>/src/app/$1',
+    'next-auth/react': '<rootDir>/node_modules/next-auth/react/index',
     //
   },
 };
