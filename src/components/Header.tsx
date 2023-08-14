@@ -12,7 +12,7 @@ const ICON_CLASS = 'mr-6';
 export default function Header() {
   const { data: session } = useSession();
   const buttonText = session ? 'Sign out' : 'Sign in';
-  console.log('header, session: ', session);
+  // console.log('header, session: ', session);
   const pathname = usePathname();
   return (
     <header className="flex justify-between my-2  p-2 max-w-screen-2xl mx-auto ">
@@ -34,7 +34,7 @@ export default function Header() {
           {pathname === '/new' ? <BsPlusSquareFill /> : <BsPlusSquare />}
         </Link>
         <div className={ICON_CLASS}>
-          <Button text={buttonText} textSize="text-xl" />
+          <Button text={buttonText} />
         </div>
       </nav>
     </header>
