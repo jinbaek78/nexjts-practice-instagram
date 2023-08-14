@@ -20,23 +20,23 @@ describe('Header', () => {
     expect(mockRouter.asPath).toBe('/');
   });
 
-  it('navigates to home page on home icon click', () => {
+  it('navigates to home page when home icon is clicked', async () => {
     render(<Header />, { wrapper: MemoryRouterProvider });
     const links = screen.getAllByRole('link');
-    fireEvent.click(links[1]);
+    await fireEvent.click(links[1]);
 
     expect(mockRouter.asPath).toBe('/');
   });
 
-  it('navigates to new page on search icon click', () => {
+  it('navigates to new page when search icon is clicked', async () => {
     render(<Header />, { wrapper: MemoryRouterProvider });
     const links = screen.getAllByRole('link');
-    fireEvent.click(links[2]);
+    await fireEvent.click(links[2]);
 
     expect(mockRouter.asPath).toBe('/search');
   });
 
-  it('navigates to new page on search icon click', () => {
+  it('navigates to new page when search icon is clicked', () => {
     render(<Header />, { wrapper: MemoryRouterProvider });
     const links = screen.getAllByRole('link');
     fireEvent.click(links[2]);

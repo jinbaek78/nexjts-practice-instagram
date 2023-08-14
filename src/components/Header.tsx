@@ -1,11 +1,15 @@
+'use client';
+
 import { AiOutlineHome, AiFillHome } from 'react-icons/ai';
 import { BiSearch, BiSolidSearchAlt2 } from 'react-icons/bi';
 import { BsPlusSquare, BsPlusSquareFill } from 'react-icons/bs';
 import Button from './Button';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const ICON_CLASS = 'mr-6';
 export default function Header() {
+  const pathname = usePathname();
   return (
     <header className="flex justify-between my-2  p-2 max-w-screen-2xl mx-auto ">
       <section className="flex flex-col justify-center items-center">
@@ -15,15 +19,15 @@ export default function Header() {
       </section>
       <nav className="flex justify-evenly items-center text-3xl">
         <Link href={'/'} className={ICON_CLASS}>
-          <AiOutlineHome />
+          {pathname === '/' ? <AiFillHome /> : <AiOutlineHome />}
         </Link>
 
         <Link href={'/search'} className={ICON_CLASS}>
-          <BiSearch />
+          {pathname === '/search' ? <BiSolidSearchAlt2 /> : <BiSearch />}
         </Link>
 
         <Link href={'/new'} className={ICON_CLASS}>
-          <BsPlusSquare />
+          {pathname === '/new' ? <BsPlusSquareFill /> : <BsPlusSquare />}
         </Link>
         <div className={ICON_CLASS}>
           <Button text="Sign in" textSize="text-xl" />
