@@ -1,3 +1,4 @@
+import { fakeSession } from '@/tests/mock/mock';
 import {
   redirectToHomeIfLoggedIn,
   redirectToSigninIfLoggedOut,
@@ -10,15 +11,6 @@ jest.mock('next/navigation', () => ({
 }));
 
 describe('Redirect', () => {
-  const fakeSession: Session = {
-    user: {
-      email: 'abded@gmail.com',
-      image: '"https://lh3.googleusercontent.com/a/ad"',
-      name: 'jin',
-    },
-    expires: '2023-09-14T08:21:23.720Z',
-  };
-
   afterEach(() => {
     (redirect as unknown as jest.Mock).mockReset();
   });
