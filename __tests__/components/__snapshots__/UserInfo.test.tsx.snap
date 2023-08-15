@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserInfo renders 1`] = `
+<div>
+  <section
+    class="flex flex-col gap-10"
+  >
+    <p
+      class="text-zinc-600 text-lg"
+    >
+      About﹒ Help﹒Press﹒API﹒Jobs﹒
+      <br />
+      Privacy﹒Terms﹒Location﹒
+      <br />
+      Language
+    </p>
+    <p
+      class="text-zinc-700 font-semibold"
+    >
+      Copyright INSTANTGARM
+      <br />
+      from MENTAL
+    </p>
+  </section>
+</div>
+`;

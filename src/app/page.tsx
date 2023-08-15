@@ -8,7 +8,9 @@ import { useSession } from 'next-auth/react';
 
 export default function HomePage() {
   const { data: session } = useSession();
+
   redirectToSigninIfLoggedOut(session);
+
   return (
     <div className="flex">
       <section className="basis-3/5">
