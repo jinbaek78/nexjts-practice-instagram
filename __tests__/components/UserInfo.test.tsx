@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import UserInfo from '@/components/UserInfo';
 import { useSession } from 'next-auth/react';
-import { fakeSession } from '@/tests/mock/mock';
+import { fakeSession } from '@/tests/mock/session';
 import Avatar from '@/components/Avatar';
 
 jest.mock('@/components/Avatar');

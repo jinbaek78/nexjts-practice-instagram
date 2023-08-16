@@ -21,6 +21,7 @@ const config = {
     'next-auth/react': '<rootDir>/node_modules/next-auth/react/index',
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@/tests/(.*)$': '<rootDir>/src/tests/$1',
+    '^@/services/(.*)$': '<rootDir>/src/services/$1',
 
     //
   },

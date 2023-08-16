@@ -5,11 +5,13 @@ import MyInfo from '@/components/UserInfo';
 import Posts from '@/components/Posts';
 import { redirectToSigninIfLoggedOut } from '@/utils/redirect';
 import { useSession } from 'next-auth/react';
+import { getPosts } from '@/services/sanity';
 
 export default function HomePage() {
   const { data: session } = useSession();
 
   redirectToSigninIfLoggedOut(session);
+  getPosts().then((res) => console.log('got post: ', res));
 
   return (
     <div className="flex">

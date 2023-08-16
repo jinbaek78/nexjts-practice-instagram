@@ -5,9 +5,20 @@ export default defineType({
   type: 'document',
   fields: [
     defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
+      name: 'imgUrl',
+      title: 'ImageUrl',
+      type: 'string',
+    }),
+    defineField({
+      name: 'imgAssetId',
+      title: 'ImgAssetId',
+      type: 'string',
+    }),
+
+    defineField({
+      name: 'content',
+      title: 'Content',
+      type: 'string',
     }),
 
     defineField({

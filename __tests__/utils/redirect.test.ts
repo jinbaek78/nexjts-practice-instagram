@@ -1,4 +1,4 @@
-import { fakeSession } from '@/tests/mock/mock';
+import { fakeSession } from '@/tests/mock/session';
 import {
   redirectToHomeIfLoggedIn,
   redirectToSigninIfLoggedOut,
