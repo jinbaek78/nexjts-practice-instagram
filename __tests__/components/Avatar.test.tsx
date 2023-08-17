@@ -7,21 +7,16 @@ describe('Avatar', () => {
   const email = 'email@com';
   const name = 'name;';
 
-  it('should render with user detail information', () => {
-    render(<Avatar src={src} email={email} name={name} />);
+  it('should render image properly', () => {
+    render(<Avatar src={src} />);
 
-    expect(screen.getByText(email.split('@')[0])).toBeInTheDocument();
-    expect(screen.getByText(name)).toBeInTheDocument();
     const imgSrc = (screen.getByRole('img') as HTMLImageElement).src;
     expect(imgSrc).toMatch(new RegExp('src'));
   });
 
-  it('should not render the name when called without name argument ', () => {
-    render(<Avatar src={src} email={email} />);
-
-    expect(screen.getByText(email.split('@')[0])).toBeInTheDocument();
-    const imgSrc = (screen.getByRole('img') as HTMLImageElement).src;
-    expect(imgSrc).toMatch(new RegExp('src'));
-    expect(screen.queryByText(name)).toBeNull();
+  it('should properly render the image at the specified size', () => {
+    render(<Avatar src={src} width={120} />);
+    const width = (screen.getByRole('img') as HTMLImageElement).width;
+    expect(width).toBe(120);
   });
 });

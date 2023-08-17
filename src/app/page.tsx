@@ -1,22 +1,20 @@
 'use client';
 
-import Followers from '@/components/Followers';
+import FollowingUsers from '@/components/FollowingUsers';
 import MyInfo from '@/components/UserInfo';
 import Posts from '@/components/Posts';
 import { redirectToSigninIfLoggedOut } from '@/utils/redirect';
 import { useSession } from 'next-auth/react';
-import { getPosts } from '@/services/sanity';
 
 export default function HomePage() {
   const { data: session } = useSession();
 
   redirectToSigninIfLoggedOut(session);
-  getPosts().then((res) => console.log('got post: ', res));
 
   return (
-    <div className="flex">
+    <div className="flex gap-16 p-8">
       <section className="basis-3/5">
-        <Followers />
+        <FollowingUsers />
         <Posts />
       </section>
       <MyInfo />

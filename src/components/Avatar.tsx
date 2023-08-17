@@ -2,23 +2,32 @@ import Image from 'next/image';
 
 type Props = {
   src: string;
-  email: string;
-  name?: string;
+  rainbow?: boolean;
+  width?: number;
 };
-export default function Avatar({ src, email, name }: Props) {
+const IMAGE_CONTAINER_CLASS =
+  'rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1 w-full';
+export default function Avatar({ src, rainbow = false, width = 100 }: Props) {
   return (
-    <div className="flex items-center">
-      <Image
-        className="rounded-full"
-        src={src || ''}
-        alt="avatar"
-        width={80}
-        height={100}
-      />
-      <div className="ml-5">
-        <h3 className="text-xl font-bold">{email && email.split('@')[0]}</h3>
-        {name && <h3 className="text-2xl text-zinc-600">{name}</h3>}
+    <>
+      <div
+        className={rainbow ? IMAGE_CONTAINER_CLASS : 'rounded-full'}
+        style={{
+          borderRadius: '999px',
+          overflow: 'hidden',
+          width: '110px',
+          height: '110px',
+          objectFit: 'cover',
+        }}
+      >
+        <Image
+          className="rounded-full bg-white p-1 w-full h-full"
+          src={src || ''}
+          alt="avatar"
+          width={width}
+          height={100}
+        />
       </div>
-    </div>
+    </>
   );
 }

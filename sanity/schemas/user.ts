@@ -1,10 +1,26 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 
 export default defineType({
-  name: 'users',
-  title: 'Users',
+  name: 'user',
+  title: 'User',
   type: 'document',
   fields: [
+    defineField({
+      name: 'name',
+      title: 'Name',
+      type: 'string',
+    }),
+    defineField({
+      name: 'emailName',
+      title: 'EmailName',
+      type: 'string',
+    }),
+    defineField({
+      name: 'avatarUrl',
+      title: 'AvatarUrl',
+      type: 'string',
+    }),
+
     defineField({
       name: 'followers',
       title: 'Followers',

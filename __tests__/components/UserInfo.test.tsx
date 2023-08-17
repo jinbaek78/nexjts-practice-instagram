@@ -29,7 +29,8 @@ describe('UserInfo', () => {
 
     expect(Avatar).toHaveBeenCalledTimes(1);
     expect((Avatar as jest.Mock).mock.calls[0][0].src).toBe(image);
-    expect((Avatar as jest.Mock).mock.calls[0][0].email).toBe(email);
-    expect((Avatar as jest.Mock).mock.calls[0][0].name).toBe(name);
+
+    expect(screen.getByText(name!)).toBeInTheDocument();
+    expect(screen.getByText(email!.split('@')[0])).toBeInTheDocument();
   });
 });

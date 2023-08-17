@@ -21,9 +21,9 @@ describe('NewPostPage', () => {
     expect(redirectToSigninIfLoggedOut).toHaveBeenCalledWith(fakeSession);
     expect(Avatar).toHaveBeenCalledTimes(1);
     expect((Avatar as jest.Mock).mock.calls[0][0]).toEqual({
-      email,
       src: image,
     });
+    expect(screen.getByText(email!.split('@')[0])).toBeInTheDocument();
     expect(ImageUploadForm).toHaveBeenCalledTimes(1);
     expect((ImageUploadForm as jest.Mock).mock.calls[0][0]).toEqual({
       username: name,
