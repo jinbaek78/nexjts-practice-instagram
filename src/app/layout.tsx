@@ -25,7 +25,7 @@ export default function RootLayout({
             <div className="bg-white w-full border-b border-b-zinc-300">
               <Header />
             </div>
-            <main className=" w-full p-2">
+            <main className=" w-full p-3">
               <div className="max-w-screen-2xl mx-auto ">{children}</div>
             </main>
           </>

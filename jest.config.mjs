@@ -22,6 +22,7 @@ const config = {
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@/tests/(.*)$': '<rootDir>/src/tests/$1',
     '^@/services/(.*)$': '<rootDir>/src/services/$1',
+    '^@/types/(.*)$': '<rootDir>/src/types/$1',
 
     //
   },

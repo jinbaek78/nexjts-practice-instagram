@@ -1,21 +1,159 @@
 import { Session } from 'next-auth';
 import { client } from '../../sanity/lib/client';
+import { mutate } from 'swr';
+import { Post as PostType } from '@/types/post';
+import { Comment } from '@/types/post';
 
-export function getPosts() {
+export async function removePostIdFromUserInfo(
+  post: PostType,
+  type: 'marked' | 'liked',
+  callback: () => void
+) {
+  console.time('removePostIdFromUserInfo');
+  callback();
+  const { _id: postId, userId, liked, marked, likes } = post;
+  console.log('removePostIdFromUserInfo called with: ', postId, userId, type);
+  // findIndex first.
+
+  // console.log(liked.findIndex((likedPostId) => likedPostId === postId));
+  // return;
+  const index =
+    type === 'liked'
+      ? liked.findIndex((likedPostId) => likedPostId === postId)
+      : marked.findIndex((likedPostId) => likedPostId === postId);
+
+  if (index === -1) {
+    console.log('there is no matched post');
+    return;
+  }
+
+  const result = await client //
+    .patch(userId)
+    .splice(type, index, 1)
+    .commit();
+  // .unset([`comments`])
+  // client.patch(pinId).unset([`comments[_key==${key}]`]).commit()
+  console.log('remove result: ', result);
+
+  if (type === 'liked') {
+    await updateLikeCount(postId, likes, 'decrease');
+  }
+  console.timeEnd('removePostIdFromUserInfo');
+  return;
+}
+
+export async function addPostIdToUSerInfo(
+  post: PostType,
+  type: 'marked' | 'liked',
+  callback: () => void
+) {
+  callback();
+  console.time('addPostIdToUSerInfo');
+  const { _id: postId, userId, likes } = post;
+  console.log('addPostIdToUSerInfo called with: ', postId, userId, type);
+  const result = await client //
+    .patch(userId)
+    .insert('after', `${type}[-1]`, [postId])
+    // .set({ liked: [] })
+    // .set({ marked: [] })
+    // .set({ likes: 0 })
+    .commit();
+
+  if (type === 'liked') {
+    await updateLikeCount(postId, likes, 'increase');
+  }
+
+  console.log('addPostIdToUSerInfo result :', result);
+  console.timeEnd('addPostIdToUSerInfo');
+  return;
+}
+
+export async function updateLikeCount(
+  postId: string,
+  likes: number,
+  type: 'increase' | 'decrease'
+) {
+  let result;
+  if (type === 'increase') {
+    console.log('increase in progress');
+    result = await client //
+      .patch(postId)
+      .inc({ likes: 1 })
+      .commit();
+  } else {
+    if (likes === 0) {
+      return;
+    }
+    console.log('decrease in progress');
+    result = await client //
+      .patch(postId)
+      .dec({ likes: 1 })
+      .commit();
+  }
+  return;
+}
+
+export async function addCommentToPost(
+  newComment: Comment & { _key: string },
+  postId: string,
+  callback: () => void
+) {
+  console.time('addCommentToPost');
+  console.log('newComment: ', newComment);
+  callback();
+  const result = await client //
+    .patch(postId)
+    // .set({ comments: [] })
+    .insert('after', 'comments[-1]', [newComment])
+    .commit();
+
+  console.log('addCommentToPost result: ', addCommentToPost);
+  console.timeEnd('addCommentToPost');
+  return mutate('posts');
+}
+
+export async function getPosts(session: Session | null) {
+  console.time('getPosts');
+  if (!session) {
+    return;
+  }
   console.log('getPosts called');
-  // return client.fetch('*[_type == "post"]');
-  // return client.fetch(`*[_type == 'post']{
-  //   name,
-  //   "imageUrl": image.asset->url
-  // }`);
-  return client.fetch(`*[_type == 'post']`);
-  // urlForImage(image).width(200).url()
+  const result = [];
+  let posts;
+  // to be modified => `*[_type == 'post' && author == '${userInfo[0].name or userInfo[0].following[i].name}']
+  try {
+    //
+    posts = await client.fetch(`*[_type == 'post']`);
+  } catch (error) {
+    console.error(error);
+  }
+  console.log('raw posts: ', posts);
+  const userInfo = await getOrCreateUser(session);
+  const liked = userInfo[0].liked;
+  const marked = userInfo[0].marked;
+
+  for (let i = 0; i < posts.length; i++) {
+    const isLiked = liked.includes(posts[i]._id);
+    const isMarked = marked.includes(posts[i]._id);
+    // user name and info will be modified into fetching query ( fetch('*[_type == 'user' && name == '${author}'))
+    result.push({
+      ...posts[i],
+      isLiked,
+      isMarked,
+      name: userInfo[0].name,
+      avatarUrl: userInfo[0].avatarUrl,
+      userId: userInfo[0]._id,
+      marked,
+      liked,
+    });
+  }
+  console.log('added posts: ', result);
+  console.timeEnd('getPosts');
+  return result;
 }
 
 export async function getFollowingUserInfo(session: Session | null) {
-  console.log('getFollowingUserInfo called');
   if (!session) {
-    console.log('there is no session');
     return;
   }
 
@@ -33,7 +171,6 @@ export async function getFollowingUserInfo(session: Session | null) {
     }
     result.push(followingUserInfo[0]);
   }
-  console.log('result: ', result);
   return result;
 }
 export async function getOrCreateUser(session: Session | null) {
@@ -63,7 +200,7 @@ export async function getOrCreateUser(session: Session | null) {
       posts: [],
     });
   }
-  console.log('user data: ', res);
+  console.log('userInfo: ', res);
   return res;
 }
 

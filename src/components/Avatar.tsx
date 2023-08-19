@@ -15,8 +15,8 @@ export default function Avatar({ src, rainbow = false, width = 100 }: Props) {
         style={{
           borderRadius: '999px',
           overflow: 'hidden',
-          width: '110px',
-          height: '110px',
+          width: `${width}px`,
+          height: `${width}px`,
           objectFit: 'cover',
         }}
       >

@@ -12,12 +12,15 @@ export default function HomePage() {
   redirectToSigninIfLoggedOut(session);
 
   return (
-    <div className="flex gap-16 p-8">
+    <div className="flex gap-16 p-8 pl-60">
+      {/* <section className="basis-2/5 pl-60"> */}
       <section className="basis-3/5">
         <FollowingUsers />
         <Posts />
       </section>
-      <MyInfo />
+      <section className="basis-2/5">
+        <MyInfo />
+      </section>
     </div>
   );
 }

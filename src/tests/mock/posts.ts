@@ -1,0 +1,61 @@
+export const fakePosts = [
+  {
+    author: 'testUser1',
+    avatarUrl:
+      'https://cdn.sanity.io/images/rfd2ipwe/instagram/030d84fac751a080cd20e447ad0d12ea043391fb-3670x4893.jpg',
+    comments: [{ username: 'testUser1', comment: 'test1' }],
+    content: 'alice',
+    imgAssetId: 'eeaa49d73dab0be2423295710371ebfe281384e9',
+    imgUrl: '/test',
+    isLiked: false,
+    isMarked: false,
+    liked: [
+      '76ewoxhAm9hNbPwR5nU9qJ',
+      'Ini7I8Tmq64qDWCLHOiGDi',
+      'Ini7I8Tmq64qDWCLHOiFmc',
+      'Ini7I8Tmq64qDWCLHOiFb0',
+      '76ewoxhAm9hNbPwR5nU6Ye',
+    ],
+    likes: 0,
+    marked: ['Ini7I8Tmq64qDWCLHOiGDi', 'Ini7I8Tmq64qDWCLHOiFb0'],
+    name: 'Jin Baek',
+    userId: 'drafts.mlQRzbyTLyVw7G9D8tRIQ9',
+    _createdAt: '2023-08-17T05:26:31Z',
+    _id: '76ewoxhAm9hNbPwR5nU6Ye',
+    _rev: 'mlQRzbyTLyVw7G9D9AenQJ',
+    _type: 'post',
+    _updatedAt: '2023-08-19T06:17:12Z',
+  },
+
+  {
+    author: 'testUser2',
+    avatarUrl:
+      'https://cdn.sanity.io/images/rfd2ipwe/instagram/030d84fac751a080cd20e447ad0d12ea043391fb-3670x4893.jpg',
+    comments: [
+      { username: 'testUser1', comment: 'test1' },
+      { username: 'testUser2', comment: 'test2' },
+    ],
+    content: 'luna',
+    imgAssetId: '7dd9fec2acac6a29f6abd4fd088762331e4e78dc',
+    imgUrl:
+      'https://cdn.sanity.io/images/rfd2ipwe/instagram/7dd9fec2acac6a29f6abd4fd088762331e4e78dc-3304x4129.jpg',
+    isLiked: true,
+    isMarked: true,
+    liked: [
+      '76ewoxhAm9hNbPwR5nU9qJ',
+      'Ini7I8Tmq64qDWCLHOiGDi',
+      'Ini7I8Tmq64qDWCLHOiFmc',
+      'Ini7I8Tmq64qDWCLHOiFb0',
+      '76ewoxhAm9hNbPwR5nU6Ye',
+    ],
+    likes: 1,
+    marked: ['Ini7I8Tmq64qDWCLHOiGDi', 'Ini7I8Tmq64qDWCLHOiFb0'],
+    name: 'Jin Baek',
+    userId: 'drafts.mlQRzbyTLyVw7G9D8tRIQ9',
+    _createdAt: '2023-08-17T05:27:00Z',
+    _id: 'Ini7I8Tmq64qDWCLHOiFb0',
+    _rev: 'Ini7I8Tmq64qDWCLHVNVNK',
+    _type: 'post',
+    _updatedAt: '2023-08-19T05:37:49Z',
+  },
+];

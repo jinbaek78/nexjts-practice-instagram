@@ -17,18 +17,17 @@ export default function FollowingUsers() {
     isLoading,
   } = useSWR(`${session?.user?.name}`, () => getFollowingUserInfo(session));
   return (
-    <div className="w-full h-44 shadow-md rounded-md static ">
+    <div className="w-full h-44 shadow-md rounded-md ">
       {isLoading && (
         <PropagateLoader
           color="red"
-          loading={true}
-          className="w-full h-full absolute left-1/2 top-1/2"
+          loading={isLoading}
+          className="w-full h-full relative left-1/2 top-1/2"
         />
       )}
-
       {followingList && (
         <ul className="w-full flex justify-between p-5">
-          {followingList?.length > 6 ? (
+          {followingList?.length > 4 ? (
             <UsersCarousel>
               {followingList?.map(({ avatarUrl, name }: FollowingUser) => (
                 <div

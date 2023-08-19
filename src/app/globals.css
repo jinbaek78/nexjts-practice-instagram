@@ -15,9 +15,9 @@
 }
 
 .react-multiple-carousel__arrow--right {
-  transform: translateX(50px);
+  transform: translateX(30px);
 }
 
 .react-multiple-carousel__arrow--left {
-  transform: translateX(-50px);
+  transform: translateX(-30px);
 }
