@@ -4,12 +4,10 @@ import { ChangeEvent, DragEvent, FormEvent, useState } from 'react';
 import { FaPhotoVideo } from 'react-icons/fa';
 import { GridLoader } from 'react-spinners';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
-type Props = {
-  username: string;
-};
-
-export default function ImageUploadForm({ username }: Props) {
+export default function ImageUploadForm() {
+  const { data: session } = useSession();
   const [imageFile, setImageFile] = useState<globalThis.File | undefined>(
     undefined
   );
@@ -19,9 +17,12 @@ export default function ImageUploadForm({ username }: Props) {
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
+
     setIsLoading(true);
     return storeImageFileToCMS(imageFile) //
-      .then((res) => publishPost({ ...res, content: text, author: username }))
+      .then(({ imgAssetId, imgUrl }) =>
+        publishPost({ comment: text, imgAssetId, imgUrl, session })
+      )
       .then(() => {
         setIsLoading(false);
         router.push('/');

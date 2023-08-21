@@ -1,10 +1,12 @@
 'use client';
 
 import FollowingUsers from '@/components/FollowingUsers';
-import MyInfo from '@/components/UserInfo';
 import Posts from '@/components/Posts';
+import UserInfoSide from '@/components/UserInfoSide';
+import { getOrCreateUser } from '@/services/sanity';
 import { redirectToSigninIfLoggedOut } from '@/utils/redirect';
 import { useSession } from 'next-auth/react';
+import useSWR from 'swr';
 
 export default function HomePage() {
   const { data: session } = useSession();
@@ -19,7 +21,8 @@ export default function HomePage() {
         <Posts />
       </section>
       <section className="basis-2/5">
-        <MyInfo />
+        {/* <MyInfo /> */}
+        <UserInfoSide />
       </section>
     </div>
   );

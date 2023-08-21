@@ -2,6 +2,7 @@
 
 import Avatar from '@/components/Avatar';
 import ImageUploadForm from '@/components/ImageUploadForm';
+import { removeAllPosts } from '@/services/sanity';
 import { redirectToSigninIfLoggedOut } from '@/utils/redirect';
 import { useSession } from 'next-auth/react';
 
@@ -17,7 +18,7 @@ export default function NewPostPage() {
           <h3 className="text-3xl font-bold">{email && email.split('@')[0]}</h3>
         </div>
       </section>
-      <ImageUploadForm username={name || ''} />
+      <ImageUploadForm />
     </main>
   );
 }

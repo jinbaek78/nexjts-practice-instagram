@@ -1,17 +1,21 @@
-export type Post = {
-  author: string;
+export type Post = NewPost & {
+  // user
   avatarUrl: string;
-  comments: Comment[];
-  content: string;
-  imgAssetId: string;
-  imgUrl: string;
-  isLiked: boolean;
-  likes: number;
-  isMarked: boolean;
+  name: string;
+  userId: string;
   marked: string[];
   liked: string[];
-  userId: string;
-  name: string;
+  // made for UI
+  isLiked: boolean;
+  isMarked: boolean;
+};
+
+export type NewPost = {
+  author: string;
+  likes: number;
+  comments: Comment[];
+  imgAssetId: string;
+  imgUrl: string;
   _createdAt: string;
   _id: string;
   _rev: string;
@@ -23,3 +27,5 @@ export type Comment = {
   username: string;
   comment: string;
 };
+
+export type PostOption = 'saved' | 'liked' | 'posts';

@@ -16,12 +16,6 @@ export default defineType({
     }),
 
     defineField({
-      name: 'content',
-      title: 'Content',
-      type: 'string',
-    }),
-
-    defineField({
       name: 'likes',
       title: 'Likes',
       type: 'number',

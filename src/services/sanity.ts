@@ -1,20 +1,46 @@
 import { Session } from 'next-auth';
 import { client } from '../../sanity/lib/client';
 import { mutate } from 'swr';
-import { Post as PostType } from '@/types/post';
+import { NewPost, Post as PostType } from '@/types/post';
 import { Comment } from '@/types/post';
+import { v4 as uuidv4 } from 'uuid';
+import { User } from '@/types/user';
+
+export async function getUserByName(allUsers: User[], name: string) {
+  console.log('getUserByName: called with allUsers, name: ', allUsers, name);
+
+  if (!allUsers) {
+    console.log('allUsers is not set yet');
+    return;
+  }
+  console.time('getUserByName');
+  const user: User | undefined = allUsers.find(
+    (user: User) => user.name === name
+  );
+  // const user = await client.fetch(`*[_type == 'user' && name == '${name}']`);
+  console.log('getUserByName: found user: ', user);
+  console.timeEnd('getUserByName');
+  return [user];
+}
+
+export async function getAllUsers() {
+  console.time('getAllUsers');
+  const users = await client.fetch(`*[_type == 'user']`);
+  console.log('getAllUsers: all users info : ', users);
+  console.timeEnd('getAllUsers');
+  return users;
+}
 
 export async function removePostIdFromUserInfo(
   post: PostType,
   type: 'marked' | 'liked',
-  callback: () => void
+  callback?: () => void
 ) {
   console.time('removePostIdFromUserInfo');
-  callback();
-  const { _id: postId, userId, liked, marked, likes } = post;
+  callback && callback();
+  const { name, _id: postId, userId, liked, marked, likes } = post;
   console.log('removePostIdFromUserInfo called with: ', postId, userId, type);
   // findIndex first.
-
   // console.log(liked.findIndex((likedPostId) => likedPostId === postId));
   // return;
   const index =
@@ -38,22 +64,31 @@ export async function removePostIdFromUserInfo(
   if (type === 'liked') {
     await updateLikeCount(postId, likes, 'decrease');
   }
+  mutate('posts');
+  // mutate('userInfo');
+  mutate('allUsers').then((res) => {
+    console.log('mutate allUsers result: ', res);
+    console.log(`mutate(user/${name}) called`);
+    mutate(`user/${name}`);
+  });
   console.timeEnd('removePostIdFromUserInfo');
   return;
 }
 
-export async function addPostIdToUSerInfo(
-  post: PostType,
-  type: 'marked' | 'liked',
-  callback: () => void
+export async function addPostIdToUserInfo(
+  post: Pick<PostType, 'name' | '_id' | 'userId' | 'likes'>,
+  type: 'marked' | 'liked' | 'posts',
+  callback?: () => void
 ) {
-  callback();
-  console.time('addPostIdToUSerInfo');
-  const { _id: postId, userId, likes } = post;
-  console.log('addPostIdToUSerInfo called with: ', postId, userId, type);
+  callback && callback();
+  const { name, _id: postId, userId, likes } = post;
+  console.log('addPostIdToUserInfo called with: ', post);
+  name;
+  console.log('addPostIdToUserInfo args: ', postId, userId);
   const result = await client //
     .patch(userId)
     .insert('after', `${type}[-1]`, [postId])
+    // .set({ posts: [] })
     // .set({ liked: [] })
     // .set({ marked: [] })
     // .set({ likes: 0 })
@@ -63,9 +98,16 @@ export async function addPostIdToUSerInfo(
     await updateLikeCount(postId, likes, 'increase');
   }
 
-  console.log('addPostIdToUSerInfo result :', result);
-  console.timeEnd('addPostIdToUSerInfo');
-  return;
+  console.log('addPostIdToUserInfo result :', result);
+  console.timeEnd('addPostIdToUserInfo');
+  mutate('posts');
+  // mutate('userInfo');
+  mutate('allUsers').then((res) => {
+    console.log('mutate allUsers result: ', res);
+    console.log(`mutate(user/${name}) called`);
+    mutate(`user/${name}`);
+  });
+  return result;
 }
 
 export async function updateLikeCount(
@@ -101,7 +143,7 @@ export async function addCommentToPost(
   console.time('addCommentToPost');
   console.log('newComment: ', newComment);
   callback();
-  const result = await client //
+  await client //
     .patch(postId)
     // .set({ comments: [] })
     .insert('after', 'comments[-1]', [newComment])
@@ -112,25 +154,29 @@ export async function addCommentToPost(
   return mutate('posts');
 }
 
-export async function getPosts(session: Session | null) {
-  console.time('getPosts');
-  if (!session) {
+export async function getPostsById(ids: string[], userInfo: User) {
+  // console.log('getPostsById called with ids, userInfo: ', ids, userInfo);
+  if (!ids || !userInfo) {
+    console.log('there is no ids or userInfo');
     return;
   }
-  console.log('getPosts called');
+
+  const posts: NewPost[] = [];
   const result = [];
-  let posts;
-  // to be modified => `*[_type == 'post' && author == '${userInfo[0].name or userInfo[0].following[i].name}']
+  const { marked, liked } = userInfo;
   try {
     //
-    posts = await client.fetch(`*[_type == 'post']`);
+    for (let i = 0; i < ids.length; i++) {
+      // how to fetch posts in a parallel way?
+      const post = (
+        await client.fetch(`*[_type == 'post'  && _id == '${ids[i]}']`)
+      )[0];
+      posts.push(post);
+    }
   } catch (error) {
+    console.log('got error: ', error);
     console.error(error);
   }
-  console.log('raw posts: ', posts);
-  const userInfo = await getOrCreateUser(session);
-  const liked = userInfo[0].liked;
-  const marked = userInfo[0].marked;
 
   for (let i = 0; i < posts.length; i++) {
     const isLiked = liked.includes(posts[i]._id);
@@ -140,14 +186,55 @@ export async function getPosts(session: Session | null) {
       ...posts[i],
       isLiked,
       isMarked,
-      name: userInfo[0].name,
-      avatarUrl: userInfo[0].avatarUrl,
-      userId: userInfo[0]._id,
+      name: userInfo?.name,
+      avatarUrl: userInfo?.avatarUrl,
+      userId: userInfo?._id,
       marked,
       liked,
     });
   }
-  console.log('added posts: ', result);
+  console.log('getPostsById result: ', result);
+  return result;
+}
+
+export async function getPosts(session: Session | null) {
+  console.log('getPosts called with session');
+  console.log('is called with session: ', !!session);
+  if (!session) {
+    return;
+  }
+
+  const result = [];
+  const posts: NewPost[] = [];
+  // 📌 to be modified => `*[_type == 'post' && author == '${UserInfo[0].name or UserInfo[0].following[i].name}']
+  try {
+    posts.push(...(await client.fetch(`*[_type == 'post']`)));
+  } catch (error) {
+    console.log('got error: ', error);
+    console.error(error);
+  }
+  // 🐛
+  const userInfo = (await getOrCreateUser(session))[0] as User;
+  const { liked, marked, name, avatarUrl, _id } = userInfo;
+  //
+
+  for (let i = 0; i < posts.length; i++) {
+    const isLiked = liked.includes(posts[i]._id);
+    const isMarked = marked.includes(posts[i]._id);
+    // user name and info will be modified into fetching query ( fetch('*[_type == 'user' && name == '${author}'))
+    result.push({
+      ...posts[i],
+      isLiked,
+      isMarked,
+      name,
+      avatarUrl,
+      userId: _id,
+      marked,
+      liked,
+    });
+  }
+  console.log('getPosts raw post:  ', posts);
+  console.log('getPosts: added posts: ', result);
   console.timeEnd('getPosts');
   return result;
 }
@@ -158,22 +245,32 @@ export async function getFollowingUserInfo(session: Session | null) {
   }
 
   const result = [];
-  const userInfo = (await getOrCreateUser(session))[0];
-  const followingList = userInfo.following;
+  const UserInfo = (await getOrCreateUser(session))[0];
+  const followingList = UserInfo.following;
+  // is there a way to fetch all data in a parallel way?
   for (let i = 0; i < followingList.length; i++) {
     let followingUserInfo;
     try {
+      // followingUserInfo = await client.fetch(
+      //   `*[_type == 'user' && name == '${followingList[i]}']{name, avatarUrl}`
+      // );
       followingUserInfo = await client.fetch(
-        `*[_type == 'user' && name == '${followingList[i]}']{name, avatarUrl}`
+        `*[_type == 'user' && name == '${followingList[i]}']`
       );
     } catch (error) {
       console.error(error);
     }
     result.push(followingUserInfo[0]);
   }
+  console.log('followingUserInfo result: ', result);
   return result;
 }
-export async function getOrCreateUser(session: Session | null) {
+export async function getOrCreateUser(
+  session: Session | null
+  // userInfo?: User
+) {
+  console.log('getOrCreateUser called');
+  // if (!session && !userInfo) {
   if (!session) {
     console.log('there is no session');
     return;
@@ -200,7 +297,7 @@ export async function getOrCreateUser(session: Session | null) {
       posts: [],
     });
   }
-  console.log('userInfo: ', res);
+  console.log('UserInfo: ', res);
   return res;
 }
 
@@ -222,23 +319,65 @@ export async function storeImageFileToCMS(data: any) {
 }
 
 export async function publishPost({
-  author,
-  content,
+  comment,
   imgAssetId,
   imgUrl,
-}: Post) {
+  session,
+}: Pick<Post, 'imgUrl' | 'imgAssetId'> & {
+  session: Session | null;
+  comment: string;
+}) {
+  console.time('publishPost');
+  if (!session) {
+    return;
+  }
+
   const post = {
     _type: 'post',
     //
+    author: session?.user?.name,
     imgUrl: imgUrl,
     imgAssetId: imgAssetId,
-    content: content,
-    author: author,
     //
     likes: 0,
-    comments: [],
+    comments:
+      comment !== ''
+        ? [{ username: session.user?.name, comment, _key: uuidv4() }]
+        : [],
   };
 
-  const res = await client.create(post);
-  return res;
+  let newPost;
+  try {
+    newPost = await client.create(post);
+  } catch (error) {
+    console.error(error);
+  }
+
+  // 🐛 in userinfo, posts=[userId, userId, userId]...
+  const userInfo = (await getOrCreateUser(session))?.[0];
+  const { _id: userId, name } = userInfo as User;
+  const { _id, likes } = newPost as NewPost;
+  const postInfo = {
+    name,
+    userId,
+    _id,
+    likes,
+  };
+  const addingPostResult = await addPostIdToUserInfo(postInfo, 'posts');
+  console.log('addingPostResult: ', addingPostResult);
+  console.timeEnd('publishPost');
+  return;
+}
+
+export async function removeAllPosts() {
+  // posts = await client.fetch(`*[_type == 'post']`);
+  const ids = await client.fetch(`*[_type == 'post']{_id}`);
+  const mappedIds = ids.map((oneId: any) => oneId._id);
+  console.log('mappedIds: ', mappedIds);
+  console.log('got ids: ', ids);
+  for (let i = 0; i < mappedIds?.length; i++) {
+    await client.delete(mappedIds[i]);
+  }
+
+  console.log('removed all the posts');
 }

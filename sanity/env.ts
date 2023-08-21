@@ -14,9 +14,6 @@ export const projectId = assertValue(
   'Missing environment variable: NEXT_PUBLIC_SANITY_PROJECT_ID'
 );
 
-// NEXT_PUBLIC_SANITY_PROJECT_ID,
-// skxeFOCQG2Ay7KvEkK26cQQ3nsDO1T7hPmhCELW36twZ4EeZYGPKpMeQppvYrHhuXuWsVo4kECOToE54U8Y7vexf6CSvaGDaGI6X5xCD9GMgrEUX1FgQH4MAeXd5vsHC5RPRX5wA1P9Is9WE9AjEfD2YsM6ljXvNRp6DJHSy0TOno7PZWir4
-
 export const useCdn = false;
 
 function assertValue<T>(v: T | undefined, errorMessage: string): T {

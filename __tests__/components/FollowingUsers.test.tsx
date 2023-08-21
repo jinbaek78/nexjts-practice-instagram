@@ -22,7 +22,8 @@ jest.mock('@/components/UsersCarousel');
 describe('FollowingUsers', () => {
   afterEach(() => {
     (useSession as jest.Mock).mockReset();
-    (getFollowingUserInfo as jest.Mock).mockReset();
+    (getFollowingUserInfo as jest.Mock).mockClear();
+    (UsersCarousel as jest.Mock).mockReset();
   });
 
   it('renders with loading spinner', async () => {
@@ -45,7 +46,6 @@ describe('FollowingUsers', () => {
     (getFollowingUserInfo as jest.Mock).mockImplementation(
       async () => fakeFollowingUserThreeInfo
     );
-
     render(<FollowingUsers />);
     await waitFor(() => {
       expect(screen.getByRole('list')).toBeInTheDocument();
@@ -58,11 +58,12 @@ describe('FollowingUsers', () => {
   });
 
   it('renders user Avatar with carousel ui', async () => {
+    const sevenFollowingUsers = fakeFollowingUserSevenInfo;
     (useSession as jest.Mock).mockImplementation(() => ({
       data: { ...fakeSession, user: { ...fakeSession.user, name: 'test3' } },
     }));
     (getFollowingUserInfo as jest.Mock).mockImplementation(
-      async () => fakeFollowingUserSevenInfo
+      async () => sevenFollowingUsers
     );
     render(<FollowingUsers />);
     await waitFor(() => {

@@ -1,16 +1,20 @@
-export const fakeUser = [
+import { User } from '@/types/user';
+
+export const fakeUser: User[] = [
   {
     avatarUrl: 'https:/',
     emailName: 'testEmailName',
     name: 'testName',
     followers: 0,
     following: ['emma', 'sarah', 'alice', 'amelia', 'luna', 'david', 'james'],
-    liked: [],
-    marked: [],
-    posts: [],
+    liked: ['liked1', 'liked2'],
+    marked: ['marked1', 'marked2'],
+    posts: ['posts1', 'post2', 'post3'],
     _createdAt: '2023-08-17T05:16:56Z',
     _id: 'mlQRzbyTLyVw7G9D8tRIQ9',
     _type: 'user',
+    _rev: '',
+    _updatedAt: '',
   },
 ];
 

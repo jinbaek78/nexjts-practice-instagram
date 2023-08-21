@@ -21,7 +21,7 @@ jest.mock('@/services/sanity', () => ({
 jest.mock('next-auth/react');
 jest.mock('react-spinners');
 
-describe.skip('Posts', () => {
+describe('Posts', () => {
   afterEach(() => {
     (useSession as jest.Mock).mockReset();
     (getPosts as jest.Mock).mockReset();
@@ -29,19 +29,12 @@ describe.skip('Posts', () => {
     (PostCard as jest.Mock).mockReset();
   });
 
-  it('should render the loading spinner when the data is being fetched', async () => {
-    (useSession as jest.Mock).mockImplementation(() => {
-      console.log('mocked useSession called');
-      return { data: fakeSession };
-    });
-    (getPosts as jest.Mock).mockImplementation(async () => {
-      console.log('mocked getPosts called');
-      return fakePosts;
-    });
-    (GridLoader as jest.Mock).mockImplementation(() => {
-      console.log('mocked GridLoader called');
-    });
+  beforeEach(() => {
+    (useSession as jest.Mock).mockImplementation(() => ({ data: fakeSession }));
+    (getPosts as jest.Mock).mockImplementation(async () => fakePosts);
+  });
 
+  it('should render the loading spinner when the data is being fetched', async () => {
     render(<Posts />);
 
     waitFor(() => {
@@ -50,22 +43,7 @@ describe.skip('Posts', () => {
   });
 
   it('should render postcards correctly', async () => {
-    let postCardCallTimes = 0;
-    (useSession as jest.Mock).mockImplementation(() => {
-      console.log('mocked useSession called');
-      return { data: fakeSession };
-    });
-    (getPosts as jest.Mock).mockImplementation(async () => {
-      console.log('mocked getPosts called');
-      return fakePosts;
-    });
-    (GridLoader as jest.Mock).mockImplementation(() => {
-      console.log('mocked GridLoader called');
-    });
-    (PostCard as jest.Mock).mockImplementation(() => {
-      console.log('mocked PostCard called');
-      return <li>called</li>;
-    });
+    (PostCard as jest.Mock).mockImplementation(() => <li>called</li>);
 
     render(<Posts />);
     await waitFor(() => {

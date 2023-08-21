@@ -15,7 +15,7 @@ import { FaRegSmile } from 'react-icons/fa';
 
 import {
   addCommentToPost,
-  addPostIdToUSerInfo,
+  addPostIdToUserInfo,
   removePostIdFromUserInfo,
 } from '@/services/sanity';
 
@@ -32,14 +32,16 @@ jest.mock('react-icons/bs');
 jest.mock('react-icons/fa');
 jest.mock('@/services/sanity', () => ({
   addCommentToPost: jest.fn(() => console.log('addCommentToPost called')),
-  addPostIdToUSerInfo: jest.fn(() => console.log('addPostIdToUSerInfo called')),
+  addPostIdToUserInfo: jest.fn(() => console.log('addPostIdToUserInfo called')),
   removePostIdFromUserInfo: jest.fn(() =>
     console.log('removePostIdFromUserInfo called')
   ),
 }));
 
 jest.mock('timeago.js');
-jest.mock('uuid');
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => console.log('mcoked uuid called')),
+}));
 
 describe('PostCard', () => {
   const fakePost: Post = fakePosts[0];
@@ -49,7 +51,7 @@ describe('PostCard', () => {
   const fakePostGotTwoComment = fakePosts[1];
   const fakeIndex = 0;
   const FAKE_ID = 'fakeId';
-  const FAKE_KEY = 'fakeKey1';
+  const FAKE_KEY1 = 'fakeKey1';
   const FAKE_KEY2 = 'fakeKey2';
   const FAKE_KEY3 = 'fakeKey3';
   const FAKE_KEY4 = 'fakeKey4';
@@ -57,18 +59,27 @@ describe('PostCard', () => {
   const FAKE_KEY6 = 'fakeKey6';
   const FAKE_KEY7 = 'fakeKey7';
   const FAKE_KEY8 = 'fakeKey8';
+  const FAKE_KEY9 = 'fakeKey9';
+  const FAKE_KEY10 = 'fakeKey10';
+  const fakeKeys = [
+    FAKE_KEY1,
+    FAKE_KEY2,
+    FAKE_KEY3,
+    FAKE_KEY4,
+    FAKE_KEY5,
+    FAKE_KEY6,
+    FAKE_KEY7,
+    FAKE_KEY8,
+    FAKE_KEY9,
+    FAKE_KEY10,
+  ];
   const mockedOnUpdated = jest.fn();
 
   beforeEach(() => {
-    (uuidv4 as jest.Mock)
-      .mockReturnValueOnce(FAKE_KEY)
-      .mockReturnValueOnce(FAKE_KEY2)
-      .mockReturnValueOnce(FAKE_KEY3)
-      .mockReturnValueOnce(FAKE_KEY4)
-      .mockReturnValueOnce(FAKE_KEY5)
-      .mockReturnValueOnce(FAKE_KEY6)
-      .mockReturnValueOnce(FAKE_KEY7)
-      .mockReturnValueOnce(FAKE_KEY8);
+    uuidv4 as jest.Mock;
+    for (let i = 0; i < fakeKeys.length; i++) {
+      (uuidv4 as jest.Mock).mockReturnValueOnce(fakeKeys[i]);
+    }
   });
 
   afterEach(() => {
@@ -81,17 +92,17 @@ describe('PostCard', () => {
     (FaRegSmile as jest.Mock).mockReset();
 
     (addCommentToPost as jest.Mock).mockReset();
-    (addPostIdToUSerInfo as jest.Mock).mockReset();
+    (addPostIdToUserInfo as jest.Mock).mockReset();
     (removePostIdFromUserInfo as jest.Mock).mockReset();
 
     (format as jest.Mock).mockReset();
     mockedOnUpdated.mockClear();
-    (uuidv4 as jest.Mock).mockReset();
+    // (uuidv4 as jest.Mock).mockReset();
     //
   });
 
   it('should render with post details', () => {
-    (uuidv4 as jest.Mock).mockImplementation(() => FAKE_ID);
+    // (uuidv4 as jest.Mock).mockImplementation(() => FAKE_ID);
     const {
       _id: postId,
       avatarUrl,
@@ -126,7 +137,7 @@ describe('PostCard', () => {
 
   describe('BookMark Button', () => {
     it('should call the addPostIdToUserInfo method with the correct arguments when a user clicks the unfilled bookmark button', async () => {
-      (addPostIdToUSerInfo as jest.Mock).mockImplementation(
+      (addPostIdToUserInfo as jest.Mock).mockImplementation(
         (post, type, callback) => callback()
       );
       render(
@@ -146,11 +157,11 @@ describe('PostCard', () => {
 
       expect(BsBookmark).toHaveBeenCalledTimes(2);
       expect(BsBookmarkFill).not.toBeCalled();
-      expect(addPostIdToUSerInfo).toHaveBeenCalledTimes(1);
-      expect((addPostIdToUSerInfo as jest.Mock).mock.calls[0][0]).toStrictEqual(
+      expect(addPostIdToUserInfo).toHaveBeenCalledTimes(1);
+      expect((addPostIdToUserInfo as jest.Mock).mock.calls[0][0]).toStrictEqual(
         notMarkedAndNotLikedPost
       );
-      expect((addPostIdToUSerInfo as jest.Mock).mock.calls[0][1]).toBe(
+      expect((addPostIdToUserInfo as jest.Mock).mock.calls[0][1]).toBe(
         'marked'
       );
       expect(mockedOnUpdated).toHaveBeenCalledTimes(1);
@@ -192,7 +203,7 @@ describe('PostCard', () => {
 
   describe('Like Button', () => {
     it('should call the addPostIdToUserInfo method with the correct arguments when a user clicks the unfilled like button', async () => {
-      (addPostIdToUSerInfo as jest.Mock).mockImplementation(
+      (addPostIdToUserInfo as jest.Mock).mockImplementation(
         (post, type, callback) => callback()
       );
       render(
@@ -213,11 +224,11 @@ describe('PostCard', () => {
 
       expect(AiOutlineHeart).toHaveBeenCalledTimes(2);
       expect(AiFillHeart).not.toBeCalled();
-      expect(addPostIdToUSerInfo).toHaveBeenCalledTimes(1);
-      expect((addPostIdToUSerInfo as jest.Mock).mock.calls[0][0]).toStrictEqual(
+      expect(addPostIdToUserInfo).toHaveBeenCalledTimes(1);
+      expect((addPostIdToUserInfo as jest.Mock).mock.calls[0][0]).toStrictEqual(
         notMarkedAndNotLikedPost
       );
-      expect((addPostIdToUSerInfo as jest.Mock).mock.calls[0][1]).toBe('liked');
+      expect((addPostIdToUserInfo as jest.Mock).mock.calls[0][1]).toBe('liked');
       expect(mockedOnUpdated).toHaveBeenCalledTimes(1);
       expect(mockedOnUpdated).toHaveBeenCalledWith(fakeIndex, updatedPost);
     });
@@ -276,7 +287,7 @@ describe('PostCard', () => {
         comment,
         username,
         // _key: FAKE_KEY3,
-        _key: FAKE_KEY6,
+        _key: FAKE_KEY3,
       };
       const updatedPost = {
         ...fakePost,
@@ -288,6 +299,7 @@ describe('PostCard', () => {
       await userEvent.type(input, `${comment}{enter}`);
 
       expect(addCommentToPost).toHaveBeenCalledTimes(1);
+      // expect((addCommentToPost as jest.Mock).mock.calls[0][0]).toBe('');
       expect((addCommentToPost as jest.Mock).mock.calls[0][0]).toEqual(
         newComment
       );
@@ -353,6 +365,7 @@ describe('PostCard', () => {
 
       expect(screen.getAllByText(comment)).toHaveLength(2);
       expect(screen.getAllByText(username)).toHaveLength(2);
+      expect(screen.queryByText(`View all ${length} comments`)).toBeNull();
     });
 
     it('should display view all comments message when there is more than or equal to two comments', async () => {

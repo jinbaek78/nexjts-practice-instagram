@@ -26,7 +26,7 @@ type Props = {
 export default function UsersCarousel({ children }: Props) {
   return (
     <Carousel
-      containerClass={`w-[700px]`}
+      containerClass={`w-[650px]`}
       responsive={responsive}
       showDots={false}
       infinite={true}

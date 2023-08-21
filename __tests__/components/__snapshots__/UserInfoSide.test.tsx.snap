@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UserInfo renders 1`] = `
+exports[`UserInfoSide renders 1`] = `
 <div>
   <section
     class="flex flex-col gap-10"

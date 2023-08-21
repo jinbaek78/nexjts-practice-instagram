@@ -12,14 +12,13 @@ export default function Posts() {
     data: posts,
     mutate,
   } = useSWR('posts', () => getPosts(session));
-  // console.log('got posts: ', posts);
-  // console.log('isLoading: ', isLoading);
 
   const handlePostUpdateImmediately = (index: number, updated: Post) => {
     const updatedPosts = [...posts!];
     updatedPosts[index] = { ...updated };
     mutate(updatedPosts, { revalidate: false });
   };
+
   return (
     <div className="w-full h-full">
       {isLoading && (

@@ -1,16 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import UserInfo from '@/components/UserInfo';
 import { useSession } from 'next-auth/react';
 import { fakeSession } from '@/tests/mock/session';
 import Avatar from '@/components/Avatar';
+import UserInfoSide from '@/components/UserInfoSide';
 
 jest.mock('@/components/Avatar');
 jest.mock('next-auth/react', () => ({
   useSession: jest.fn(),
 }));
 
-describe('UserInfo', () => {
+describe('UserInfoSide', () => {
   const { name, email, image } = fakeSession!.user!;
 
   afterEach(() => {
@@ -20,12 +20,12 @@ describe('UserInfo', () => {
 
   it('renders', () => {
     (useSession as jest.Mock).mockImplementation(() => ({ data: fakeSession }));
-    const { container } = render(<UserInfo />);
+    const { container } = render(<UserInfoSide />);
     expect(container).toMatchSnapshot();
   });
   it('renders with user information', () => {
     (useSession as jest.Mock).mockImplementation(() => ({ data: fakeSession }));
-    render(<UserInfo />);
+    render(<UserInfoSide />);
 
     expect(Avatar).toHaveBeenCalledTimes(1);
     expect((Avatar as jest.Mock).mock.calls[0][0].src).toBe(image);

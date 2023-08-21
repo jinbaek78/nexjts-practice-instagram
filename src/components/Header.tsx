@@ -7,10 +7,14 @@ import Button from './Button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import Avatar from './Avatar';
+import useSWR from 'swr';
+import { getAllUsers } from '@/services/sanity';
 
 const ICON_CLASS = 'mr-6';
 export default function Header() {
   const { data: session } = useSession();
+  const { data: allUsers } = useSWR('allUsers', () => getAllUsers());
   const buttonText = session ? 'Sign out' : 'Sign in';
   const pathname = usePathname();
   return (
@@ -32,6 +36,15 @@ export default function Header() {
         <Link href={'/new'} className={ICON_CLASS}>
           {pathname === '/new' ? <BsPlusSquareFill /> : <BsPlusSquare />}
         </Link>
+
+        {session && (
+          <Link
+            href={`/user/${session.user?.name}?name=${session.user?.name}`}
+            className={ICON_CLASS}
+          >
+            <Avatar src={session.user?.image! || '/'} rainbow width={50} />
+          </Link>
+        )}
         <div className={ICON_CLASS}>
           <Button text={buttonText} />
         </div>
