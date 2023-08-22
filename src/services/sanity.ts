@@ -206,7 +206,13 @@ export async function getPosts(session: Session | null) {
 
   const result = [];
   const posts: NewPost[] = [];
-  // 📌 to be modified => `*[_type == 'post' && author == '${UserInfo[0].name or UserInfo[0].following[i].name}']
+  // 📌 to be updated =>
+  //  scenario1. using fetch
+  // `*[_type == 'post' && author == '${UserInfo[0].name or UserInfo[0].following[i].name}']
+  //  scenario2. using custom method for performance
+  // 1. in all posts, author === session.users.name
+  // 2. in all posts, author === UserInfo[0].following[i].name ..
+  // 3. sort by time (newest order)
   try {
     posts.push(...(await client.fetch(`*[_type == 'post']`)));
   } catch (error) {
@@ -239,30 +245,55 @@ export async function getPosts(session: Session | null) {
   return result;
 }
 
-export async function getFollowingUserInfo(session: Session | null) {
-  if (!session) {
+export async function getFollowingUserInfo(
+  allUsers: User[],
+  session: Session | null
+) {
+  if (!session || !allUsers) {
+    console.log('getFollowingUserInfo returned cuz not enough information');
     return;
   }
-
+  console.time('getFollowingUserInfo');
+  console.log(
+    'getFollowingUserInfo called with allUsers, session: ',
+    allUsers,
+    session
+  );
   const result = [];
-  const UserInfo = (await getOrCreateUser(session))[0];
-  const followingList = UserInfo.following;
-  // is there a way to fetch all data in a parallel way?
-  for (let i = 0; i < followingList.length; i++) {
-    let followingUserInfo;
-    try {
-      // followingUserInfo = await client.fetch(
-      //   `*[_type == 'user' && name == '${followingList[i]}']{name, avatarUrl}`
-      // );
-      followingUserInfo = await client.fetch(
-        `*[_type == 'user' && name == '${followingList[i]}']`
-      );
-    } catch (error) {
-      console.error(error);
+  const username = session.user?.name;
+  const userInfo = allUsers.find((user) => user.name === username);
+  const followingList = userInfo?.following || [];
+
+  for (let i = 0; i < followingList?.length; i++) {
+    const foundUser = allUsers.find((user) => user.name === followingList[i]);
+    if (foundUser) {
+      console.log('foundUser:');
+      result.push(foundUser);
     }
-    result.push(followingUserInfo[0]);
   }
-  console.log('followingUserInfo result: ', result);
+  console.log('getFollowingUserInfo: result: ', result);
+
+  // 🔥
+  // const UserInfo = (await getOrCreateUser(session))[0];
+  // const followingList = UserInfo.following;
+  // // is there a way to fetch all data in a parallel way?
+  // for (let i = 0; i < followingList.length; i++) {
+  //   let followingUserInfo;
+  //   try {
+  //     followingUserInfo = await client.fetch(
+  //       `*[_type == 'user' && name == '${followingList[i]}']`
+  //     );
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  //   result.push(followingUserInfo[0]);
+  // }
+  // console.log('followingUserInfo result: ', result);
+
+  // 🔥
+  console.timeEnd('getFollowingUserInfo');
+  // 📌to be updated: mutate('allUsers').then(() => mutate('followingUsers))
+  // after following / unfollowing
   return result;
 }
 export async function getOrCreateUser(

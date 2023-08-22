@@ -1,4 +1,4 @@
-import { getFollowingUserInfo } from '@/services/sanity';
+import { getAllUsers, getFollowingUserInfo } from '@/services/sanity';
 import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import Avatar from './Avatar';
@@ -12,17 +12,19 @@ export type FollowingUser = {
 };
 export default function FollowingUsers() {
   const { data: session } = useSession();
-  const {
-    data: followingUsers,
-    error,
-    isLoading,
-  } = useSWR(
-    `followingUsers/${session?.user?.name}`,
-    () => getFollowingUserInfo(session),
-    {
-      revalidateOnMount: true,
-    }
+  const { data: allUsers } = useSWR('allUsers', () => getAllUsers());
+  const { isLoading, data: followingUsers } = useSWR(`followingUsers`, () =>
+    getFollowingUserInfo(allUsers, session)
   );
+  // const {
+  //   data: followingUsers,
+  //   isLoading,
+  // } = useSWR(
+  //   `followingUsers/${session?.user?.name}`,
+  //   () => getFollowingUserInfo(session),
+  //   {
+  //     revalidateOnMount: true,
+  //   }
   return (
     <div className="w-full h-44 shadow-md rounded-md ">
       {isLoading && (
