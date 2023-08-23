@@ -32,15 +32,20 @@ type Props = {
 export default function UserPage({ searchParams: { name } }: Props) {
   const [selected, setSelected] = useState<PostOption>('posts');
   const [isLoading, setIsLoading] = useState(false);
-  // const { data: allUsers } = useSWR('allUsers', () => gåetAllUsers());
   const { data: session } = useSession();
   const { data: allUsersWithFollowingInfo } = useSWR(
     `allUsersWithFollowingInfo/${session?.user?.name}`,
     () => getAllUsersWithFollowingInfo(session)
   );
+  const { data: allUsers } = useSWR('allUsers', () => getAllUsers());
   const { data: userInfo } = useSWR(`user/${name}`, () =>
-    getUserByName(allUsersWithFollowingInfo, name)
+    getUserByName(session ? allUsersWithFollowingInfo : allUsers, name)
   );
+
+  //   const { data: userInfo } = useSWR(`user/${name}`, () =>
+  //   getUserByName(allUsersWithFollowingInfo, name)
+  // );
+
   const { data: myInfo } = useSWR(`user/${session?.user?.name}`, () =>
     getUserByName(allUsersWithFollowingInfo, session?.user?.name)
   );
@@ -147,13 +152,25 @@ export default function UserPage({ searchParams: { name } }: Props) {
         </div>
       </div>
       {selected === 'posts' && userInfo?.[0] && (
-        <UserPosts postIds={userInfo?.[0].posts} userInfo={userInfo?.[0]} />
+        <UserPosts
+          postIds={userInfo?.[0].posts}
+          userInfo={userInfo?.[0]}
+          session={session}
+        />
       )}
       {selected === 'saved' && userInfo?.[0] && (
-        <MarkedPosts postIds={userInfo?.[0].marked} userInfo={userInfo?.[0]} />
+        <MarkedPosts
+          postIds={userInfo?.[0].marked}
+          userInfo={userInfo?.[0]}
+          session={session}
+        />
       )}
       {selected === 'liked' && userInfo?.[0] && (
-        <LikedPosts postIds={userInfo?.[0].liked} userInfo={userInfo?.[0]} />
+        <LikedPosts
+          postIds={userInfo?.[0].liked}
+          userInfo={userInfo?.[0]}
+          session={session}
+        />
       )}
     </>
   );

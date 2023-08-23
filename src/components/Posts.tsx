@@ -35,6 +35,7 @@ export default function Posts() {
             post={post}
             index={index}
             onUpdated={handlePostUpdateImmediately}
+            session={session}
           />
         ))}
     </div>

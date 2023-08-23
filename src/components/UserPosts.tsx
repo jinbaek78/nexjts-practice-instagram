@@ -4,12 +4,14 @@ import { User } from '@/types/user';
 import useSWR from 'swr';
 import PostCard from './PostCard';
 import { GridLoader } from 'react-spinners';
+import { Session } from 'next-auth';
 
 type Props = {
   postIds: string[];
   userInfo: User;
+  session: Session | null;
 };
-export default function UserPosts({ postIds, userInfo }: Props) {
+export default function UserPosts({ postIds, userInfo, session }: Props) {
   const {
     isLoading,
     data: posts,
@@ -48,6 +50,7 @@ export default function UserPosts({ postIds, userInfo }: Props) {
               isOnlyImage
               imageHeight={500}
               onUpdated={handlePostUpdateImmediately}
+              session={session}
             />
           ))}
         </ul>

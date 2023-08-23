@@ -12,6 +12,7 @@ import {
 import { format } from 'timeago.js';
 import { v4 as uuidv4 } from 'uuid';
 import { Comment, Post } from '@/types/post';
+import { Session } from 'next-auth';
 
 type Props = {
   post: Post;
@@ -19,6 +20,7 @@ type Props = {
   onUpdated?: (index: number, updated: Post) => void;
   isOnlyImage?: boolean;
   imageHeight?: number;
+  session: Session | null;
 };
 export default function PostCard({
   post,
@@ -26,6 +28,7 @@ export default function PostCard({
   onUpdated,
   isOnlyImage,
   imageHeight,
+  session,
 }: Props) {
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const [comment, setComment] = useState('');
@@ -44,8 +47,8 @@ export default function PostCard({
     isMarked,
   } = post;
   const DIALOG_CLASS = isOnlyImage
-    ? 'backdrop:bg-black backdrop:opacity-70 w-3/5 max-w-screen-4xl'
-    : 'backdrop:bg-black backdrop:opacity-70 w-3/5 max-w-screen-2xl';
+    ? 'backdrop:bg-black backdrop:opacity-70 w-3/5 max-w-screen-4xl outline-none'
+    : 'backdrop:bg-black backdrop:opacity-70 w-3/5 max-w-screen-2xl outline-none';
 
   const handlePostClick = (event: React.MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
@@ -237,7 +240,7 @@ export default function PostCard({
                 comments.map(({ comment, username }: Comment) => (
                   <li
                     key={uuidv4()}
-                    className="text-xl flex gap-2 items-center"
+                    className="text-xl flex gap-2 items-center my-2"
                   >
                     <Avatar src={avatarUrl} width={40} />
                     <h1 className="font-bold">{username}</h1>
@@ -245,61 +248,68 @@ export default function PostCard({
                   </li>
                 ))}
             </ul>
-            <div className="p-4 px-3">
-              <div className="flex justify-between">
-                <button
-                  className="text-5xl outline-none "
-                  type="button"
-                  name="liked"
-                  data-testid="likeButtonModal"
-                  onClick={handleClick}
-                >
-                  {isLiked ? (
-                    <AiFillHeart className="text-red-500" />
-                  ) : (
-                    <AiOutlineHeart />
-                  )}
-                </button>
 
+            {session && (
+              <div className="p-4 px-3">
+                <div className="flex justify-between">
+                  <button
+                    className="text-5xl outline-none "
+                    type="button"
+                    name="liked"
+                    data-testid="likeButtonModal"
+                    onClick={handleClick}
+                  >
+                    {isLiked ? (
+                      <AiFillHeart className="text-red-500" />
+                    ) : (
+                      <AiOutlineHeart />
+                    )}
+                  </button>
+
+                  <button
+                    className="text-4xl "
+                    type="button"
+                    name="marked"
+                    data-testid="markButtonModal"
+                    onClick={handleClick}
+                  >
+                    {isMarked ? (
+                      <BsBookmarkFill className="text-black opacity-7" />
+                    ) : (
+                      <BsBookmark />
+                    )}
+                  </button>
+                </div>
+                <p className="text-lg font-bold ml-1 mb-2">{likes} like</p>
+
+                <p className="text-xl text-zinc-500 mt-2">
+                  {format(_createdAt)}
+                </p>
+              </div>
+            )}
+            {session && (
+              <div className="flex items-center text-3xl border border-t-[3px]  p-3">
+                <div className="flex flex-col justify-center items-center ">
+                  <FaRegSmile />
+                </div>
+                <input
+                  className="p-1 px-2 ml-3 flex-grow outline-none text-2xl"
+                  type="text"
+                  value={comment}
+                  data-testid="commentInputModal"
+                  onChange={handleChange}
+                  placeholder="Add a comments..."
+                />
                 <button
-                  className="text-4xl "
-                  type="button"
-                  name="marked"
-                  data-testid="markButtonModal"
-                  onClick={handleClick}
+                  className="text-sky-500 font-bold text-2xl p-2 disabled:text-sky-300"
+                  type="submit"
+                  data-testid="submitButtonModal"
+                  disabled={comment === ''}
                 >
-                  {isMarked ? (
-                    <BsBookmarkFill className="text-black opacity-7" />
-                  ) : (
-                    <BsBookmark />
-                  )}
+                  Post
                 </button>
               </div>
-              <p className="text-lg font-bold ml-1 mb-2">{likes} like</p>
-
-              <p className="text-xl text-zinc-500 mt-2">{format(_createdAt)}</p>
-            </div>
-            <div className="flex items-center text-3xl border border-t-[3px]  p-3">
-              <div className="flex flex-col justify-center items-center ">
-                <FaRegSmile />
-              </div>
-              <input
-                className="p-1 px-2 ml-3 flex-grow outline-none text-2xl"
-                type="text"
-                value={comment}
-                data-testid="commentInputModal"
-                onChange={handleChange}
-                placeholder="Add a comments..."
-              />
-              <button
-                className="text-sky-500 font-bold text-2xl p-2 disabled:text-sky-300"
-                type="submit"
-                data-testid="submitButtonModal"
-                disabled={comment === ''}
-              >
-                Post
-              </button>
-            </div>
+            )}
           </section>
         </form>
       </dialog>

@@ -12,20 +12,18 @@ import { AiOutlineHeart, AiFillHeart } from 'react-icons/ai';
 import { BsBookmark, BsBookmarkFill } from 'react-icons/bs';
 import userEvent from '@testing-library/user-event';
 import { FaRegSmile } from 'react-icons/fa';
-
 import {
   addCommentToPost,
   addPostIdToUserInfo,
   removePostIdFromUserInfo,
 } from '@/services/sanity';
-
 import { format } from 'timeago.js';
 import { v4 as uuidv4 } from 'uuid';
 import { fakePosts } from '@/tests/mock/posts';
 import PostCard from '@/components/PostCard';
 import { Post } from '@/types/post';
+import { fakeSession } from '@/tests/mock/session';
 
-//
 jest.mock('@/components/Avatar');
 jest.mock('react-icons/ai');
 jest.mock('react-icons/bs');
@@ -92,11 +90,8 @@ describe('PostCard', () => {
     (addCommentToPost as jest.Mock).mockReset();
     (addPostIdToUserInfo as jest.Mock).mockReset();
     (removePostIdFromUserInfo as jest.Mock).mockReset();
-
     (format as jest.Mock).mockReset();
     mockedOnUpdated.mockClear();
-    // (uuidv4 as jest.Mock).mockReset();
-    //
   });
 
   it('should render with post details', () => {
@@ -114,7 +109,12 @@ describe('PostCard', () => {
     } = fakePost;
 
     render(
-      <PostCard index={fakeIndex} post={fakePost} onUpdated={mockedOnUpdated} />
+      <PostCard
+        index={fakeIndex}
+        post={fakePost}
+        onUpdated={mockedOnUpdated}
+        session={fakeSession}
+      />
     );
 
     expect(Avatar).toHaveBeenCalledTimes(2 + fakePost.comments.length);
@@ -143,6 +143,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={notMarkedAndNotLikedPost}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       const bookMarkButton = screen.getByTestId('markButton');
@@ -175,6 +176,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={markedAndLikedPost}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       const bookMarkButton = screen.getByTestId('markButton');
@@ -209,6 +211,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={notMarkedAndNotLikedPost}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       const likeButton = screen.getByTestId('likeButton');
@@ -241,6 +244,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={markedAndLikedPost}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       const likeButton = screen.getByTestId('likeButton');
@@ -278,6 +282,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={fakePost}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       const input = screen.getByTestId('commentInput');
@@ -317,6 +322,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={fakePost}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       const input = screen.getByTestId('commentInput');
@@ -354,6 +360,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={fakePostGotOnlyOneComment}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
 
@@ -373,6 +380,7 @@ describe('PostCard', () => {
           index={fakeIndex}
           post={fakePostGotTwoComment}
           onUpdated={mockedOnUpdated}
+          session={fakeSession}
         />
       );
       waitFor(() => {
@@ -402,6 +410,7 @@ describe('PostCard', () => {
             index={fakeIndex}
             post={fakePostGotTwoComment}
             onUpdated={mockedOnUpdated}
+            session={fakeSession}
           />
         );
         const postImage = screen.getByTestId('postImage');
@@ -426,6 +435,7 @@ describe('PostCard', () => {
             index={fakeIndex}
             post={fakePostGotTwoComment}
             onUpdated={mockedOnUpdated}
+            session={fakeSession}
           />
         );
         const postImage = screen.getByTestId('postImage');

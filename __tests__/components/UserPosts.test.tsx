@@ -9,6 +9,7 @@ import { Post } from '@/types/post';
 import UserPosts from '@/components/UserPosts';
 import { fakeUser } from '@/tests/mock/users';
 import { SWRConfig } from 'swr';
+import { fakeSession } from '@/tests/mock/session';
 
 jest.mock('@/services/sanity', () => ({ getPostsById: jest.fn() }));
 jest.mock('react-spinners');
@@ -29,7 +30,11 @@ describe('UserPosts', () => {
   it('should display a loading spinner initially when no cached data is available', async () => {
     render(
       <SWRConfig value={{ provider: () => new Map() }}>
-        <UserPosts postIds={userPostIds} userInfo={fakeUser[0]} />
+        <UserPosts
+          postIds={userPostIds}
+          userInfo={fakeUser[0]}
+          session={fakeSession}
+        />
       </SWRConfig>
     );
     await waitFor(() => {
@@ -45,7 +50,11 @@ describe('UserPosts', () => {
 
     render(
       <SWRConfig value={{ provider: () => new Map() }}>
-        <UserPosts postIds={userPostIds} userInfo={fakeUser[0]} />
+        <UserPosts
+          postIds={userPostIds}
+          userInfo={fakeUser[0]}
+          session={fakeSession}
+        />
       </SWRConfig>
     );
 

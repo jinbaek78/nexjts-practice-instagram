@@ -7,6 +7,8 @@ type Props = {
 };
 const IMAGE_CONTAINER_CLASS =
   'rounded-full bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-1 w-full';
+
+const IMAGE_CLASS = 'rounded-full bg-white w-full h-full';
 export default function Avatar({ src, rainbow = false, width = 100 }: Props) {
   return (
     <>
@@ -21,7 +23,7 @@ export default function Avatar({ src, rainbow = false, width = 100 }: Props) {
         }}
       >
         <Image
-          className="rounded-full bg-white p-1 w-full h-full"
+          className={rainbow ? `${IMAGE_CLASS} p-1` : IMAGE_CLASS}
           src={src || ''}
           alt="avatar"
           width={width}

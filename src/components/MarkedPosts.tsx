@@ -4,12 +4,14 @@ import useSWR from 'swr';
 import PostCard from './PostCard';
 import { Post } from '@/types/post';
 import { GridLoader } from 'react-spinners';
+import { Session } from 'next-auth';
 
 type Props = {
   postIds: string[];
   userInfo: User;
+  session: Session | null;
 };
-export default function MarkedPosts({ postIds, userInfo }: Props) {
+export default function MarkedPosts({ postIds, userInfo, session }: Props) {
   const {
     isLoading,
     data: posts,
@@ -49,6 +51,7 @@ export default function MarkedPosts({ postIds, userInfo }: Props) {
               isOnlyImage
               imageHeight={500}
               onUpdated={handlePostUpdateImmediately}
+              session={session}
             />
           ))}
         </ul>
