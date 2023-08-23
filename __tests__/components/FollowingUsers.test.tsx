@@ -11,6 +11,7 @@ import {
   fakeFollowingUserSevenInfo,
   fakeFollowingUserThreeInfo,
 } from '@/tests/mock/users';
+import { SWRConfig } from 'swr';
 
 jest.mock('@/services/sanity', () => ({ getFollowingUserInfo: jest.fn() }));
 jest.mock('next-auth/react', () => ({ useSession: jest.fn() }));
@@ -33,7 +34,12 @@ describe('FollowingUsers', () => {
     (getFollowingUserInfo as jest.Mock).mockImplementation(
       async () => fakeFollowingUserThreeInfo
     );
-    render(<FollowingUsers />);
+
+    render(
+      <SWRConfig value={{ provider: () => new Map() }}>
+        <FollowingUsers />
+      </SWRConfig>
+    );
     await waitFor(() => {
       expect(PropagateLoader).toHaveBeenCalledTimes(1);
     });
@@ -46,7 +52,11 @@ describe('FollowingUsers', () => {
     (getFollowingUserInfo as jest.Mock).mockImplementation(
       async () => fakeFollowingUserThreeInfo
     );
-    render(<FollowingUsers />);
+    render(
+      <SWRConfig value={{ provider: () => new Map() }}>
+        <FollowingUsers />
+      </SWRConfig>
+    );
     await waitFor(() => {
       expect(screen.getByRole('list')).toBeInTheDocument();
     });
@@ -65,7 +75,11 @@ describe('FollowingUsers', () => {
     (getFollowingUserInfo as jest.Mock).mockImplementation(
       async () => sevenFollowingUsers
     );
-    render(<FollowingUsers />);
+    render(
+      <SWRConfig value={{ provider: () => new Map() }}>
+        <FollowingUsers />
+      </SWRConfig>
+    );
     await waitFor(() => {
       expect(screen.getByRole('list')).toBeInTheDocument();
     });

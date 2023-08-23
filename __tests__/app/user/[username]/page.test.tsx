@@ -6,7 +6,7 @@ import UserPosts from '@/tests/mock/UserPosts';
 import LikedPosts from '@/tests/mock/LikedPosts';
 import MarkedPosts from '@/tests/mock/MarkedPosts';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fakeUser } from '@/tests/mock/users';
 import { User } from '@/types/user';
@@ -17,11 +17,10 @@ import { AiOutlineHeart } from 'react-icons/ai';
 import { BsBookmark } from 'react-icons/bs';
 import UserPage from '@/app/user/[username]/page';
 import { SWRConfig } from 'swr';
+import { useSession } from 'next-auth/react';
+import { fakeSession } from '@/tests/mock/session';
 
-// jest.mock('@/components/LikedPosts');
-// jest.mock('@/components/MarkedPosts');
-// import UserPosts from '@/components/UserPosts';
-
+jest.mock('next-auth/react');
 jest.mock('@/components/UserInfoHeader');
 jest.mock('@/services/sanity', () => ({
   getAllUsers: jest.fn(),
@@ -35,6 +34,7 @@ describe('Dynamic UserPage', () => {
   const user: User = fakeUser[0];
 
   beforeEach(() => {
+    (useSession as jest.Mock).mockImplementation(() => fakeSession);
     (getAllUsers as jest.Mock).mockImplementation(async () => 'getAllUsers');
     (getUserByName as jest.Mock).mockImplementation(async (allUsers, name) => [
       user,
@@ -51,6 +51,7 @@ describe('Dynamic UserPage', () => {
     (BsGrid3X3 as jest.Mock).mockReset();
     (AiOutlineHeart as jest.Mock).mockReset();
     (BsBookmark as jest.Mock).mockReset();
+    (useSession as jest.Mock).mockReset();
   });
 
   it('should invoke UserInfoHeader when userinfo is already available', async () => {
@@ -113,6 +114,7 @@ describe('Dynamic UserPage', () => {
     await userEvent.click(savedButton);
 
     expect(MarkedPosts).toBeCalled();
+    // default: userPosts
     expect(UserPosts).toHaveBeenCalledTimes(1);
     expect(LikedPosts).not.toBeCalled();
     expect(MarkedPosts).toHaveBeenCalledWith(
@@ -157,7 +159,6 @@ describe('Dynamic UserPage', () => {
     const likedButton = screen.getByTestId('liked');
     await waitFor(() => {}, { timeout: 10 });
 
-    // default: 1
     await userEvent.click(likedButton);
     await waitFor(() => {}, { timeout: 10 });
     await userEvent.click(postsButton);

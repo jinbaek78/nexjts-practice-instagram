@@ -9,12 +9,16 @@ import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Avatar from './Avatar';
 import useSWR from 'swr';
-import { getAllUsers } from '@/services/sanity';
+import { getAllUsers, getAllUsersWithFollowingInfo } from '@/services/sanity';
 
 const ICON_CLASS = 'mr-6';
 export default function Header() {
   const { data: session } = useSession();
   const { data: allUsers } = useSWR('allUsers', () => getAllUsers());
+  const { data: allUsersWithFollowingInfo } = useSWR(
+    `allUsersWithFollowingInfo/${session?.user?.name}`,
+    () => getAllUsersWithFollowingInfo(session)
+  );
   const buttonText = session ? 'Sign out' : 'Sign in';
   const pathname = usePathname();
   return (

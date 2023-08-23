@@ -9,6 +9,5 @@ type Props = {
 };
 
 export default function AuthProvider({ children, session }: Props) {
-  console.log('session provider, session ', session);
   return <SessionProvider session={session}>{children}</SessionProvider>;
 }

@@ -16,7 +16,7 @@ import PostCard from '@/components/PostCard';
 
 jest.mock('@/components/PostCard');
 jest.mock('@/services/sanity', () => ({
-  getPosts: jest.fn(() => console.log('mocked useSession called')),
+  getPosts: jest.fn(),
 }));
 jest.mock('next-auth/react');
 jest.mock('react-spinners');

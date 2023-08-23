@@ -16,15 +16,6 @@ export default function FollowingUsers() {
   const { isLoading, data: followingUsers } = useSWR(`followingUsers`, () =>
     getFollowingUserInfo(allUsers, session)
   );
-  // const {
-  //   data: followingUsers,
-  //   isLoading,
-  // } = useSWR(
-  //   `followingUsers/${session?.user?.name}`,
-  //   () => getFollowingUserInfo(session),
-  //   {
-  //     revalidateOnMount: true,
-  //   }
   return (
     <div className="w-full h-44 shadow-md rounded-md ">
       {isLoading && (

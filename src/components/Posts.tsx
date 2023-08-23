@@ -29,17 +29,14 @@ export default function Posts() {
         />
       )}
       {posts &&
-        posts?.map((post: Post, index: number) => {
-          // console.log('post map, post, index: ', post, index);
-          return (
-            <PostCard
-              key={post._id}
-              post={post}
-              index={index}
-              onUpdated={handlePostUpdateImmediately}
-            />
-          );
-        })}
+        posts?.map((post: Post, index: number) => (
+          <PostCard
+            key={post._id}
+            post={post}
+            index={index}
+            onUpdated={handlePostUpdateImmediately}
+          />
+        ))}
     </div>
   );
 }

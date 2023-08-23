@@ -31,16 +31,14 @@ jest.mock('react-icons/ai');
 jest.mock('react-icons/bs');
 jest.mock('react-icons/fa');
 jest.mock('@/services/sanity', () => ({
-  addCommentToPost: jest.fn(() => console.log('addCommentToPost called')),
-  addPostIdToUserInfo: jest.fn(() => console.log('addPostIdToUserInfo called')),
-  removePostIdFromUserInfo: jest.fn(() =>
-    console.log('removePostIdFromUserInfo called')
-  ),
+  addCommentToPost: jest.fn(),
+  addPostIdToUserInfo: jest.fn(),
+  removePostIdFromUserInfo: jest.fn(),
 }));
 
 jest.mock('timeago.js');
 jest.mock('uuid', () => ({
-  v4: jest.fn(() => console.log('mcoked uuid called')),
+  v4: jest.fn(),
 }));
 
 describe('PostCard', () => {

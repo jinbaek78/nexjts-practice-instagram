@@ -6,15 +6,21 @@ import { Comment } from '@/types/post';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '@/types/user';
 
-export async function getUserByName(allUsers: User[], name: string) {
+export type UserWithFollowingInfo = User & { isFollowing: boolean };
+
+export async function getUserByName(
+  allUsers: UserWithFollowingInfo[] | undefined,
+  name: string | null | undefined
+) {
   console.log('getUserByName: called with allUsers, name: ', allUsers, name);
 
-  if (!allUsers) {
-    console.log('allUsers is not set yet');
+  if (!allUsers || !name) {
+    console.log('allUsers or name is not set yet');
     return;
   }
+
   console.time('getUserByName');
-  const user: User | undefined = allUsers.find(
+  const user: UserWithFollowingInfo | undefined = allUsers.find(
     (user: User) => user.name === name
   );
   // const user = await client.fetch(`*[_type == 'user' && name == '${name}']`);
@@ -23,12 +29,121 @@ export async function getUserByName(allUsers: User[], name: string) {
   return [user];
 }
 
+export async function getAllUsersWithFollowingInfo(session: Session | null) {
+  console.log('getAllUsersWithFollowingInfo called with session: ', session);
+  if (!session) {
+    console.log('getAllUsersWithFollowingInfo return cuz lack of arguments');
+    return;
+  }
+
+  console.time('getAllUsersWithFollowingInfo');
+  const allUsers = await client.fetch(`*[_type == 'user']`);
+  console.log('getAllUsersWithFollowingInfo: allUsers fetched: ', allUsers);
+  const { email: userEmail } = session.user!;
+  console.log('getAllUsersWithFollowingInfo session email: ', userEmail);
+  const userInfo: User | undefined = allUsers.find(
+    (user: User) => user?.emailName === userEmail
+  );
+  console.log('getAllUsersWithFollowingInfo: found user info: ', userInfo);
+  const result: UserWithFollowingInfo[] = [];
+  const followingList = userInfo?.following;
+
+  // 🐛 time complexity : O(n^2) => how to refactor this  array structure with object
+  // so that I can search in O(1) time
+
+  for (let i = 0; i < allUsers.length; i++) {
+    const userWithFollowingInfo = { ...allUsers[i], isFollowing: false };
+    if (followingList?.includes(allUsers[i].name)) {
+      userWithFollowingInfo.isFollowing = true;
+    }
+    result.push(userWithFollowingInfo);
+  }
+  console.timeEnd('getAllUsersWithFollowingInfo');
+  return result;
+}
+
 export async function getAllUsers() {
   console.time('getAllUsers');
   const users = await client.fetch(`*[_type == 'user']`);
   console.log('getAllUsers: all users info : ', users);
   console.timeEnd('getAllUsers');
   return users;
+}
+
+export async function followUser(
+  userInfo: UserWithFollowingInfo,
+  myInfo: UserWithFollowingInfo
+) {
+  console.time('followUser');
+  console.log('followUser: called with userinfo, myinfo: ', userInfo, myInfo);
+  const { _id: userId, name: userName } = userInfo;
+  const { _id: myId, following, name: myName } = myInfo;
+  // * userInfo: decrease followers count
+  const userInfoUpdateResult = await client //
+    .patch(userId)
+    .inc({ followers: 1 })
+    .commit();
+  // * myInfo: following [] => remove her name or email
+  //
+  console.log('userInfoUpdateResult: ', userInfoUpdateResult);
+
+  const myInfoUpdateResult = await client //
+    .patch(myId)
+    .insert('after', 'following[-1]', [userName])
+    // .splice('following', userIndex, 1)
+    .commit();
+
+  console.log('myInfoUpdateResult: ', myInfoUpdateResult);
+
+  mutate(`allUsersWithFollowingInfo/${myName}`).then((res) => {
+    console.log('mutate allUsersWithFollowingInfo result: ', res);
+    console.log(`mutate(user/${userName}) called`);
+    console.log(`mutate(user/${myName}) called`);
+    mutate(`user/${userName}`);
+    mutate(`user/${myName}`);
+  });
+  console.timeEnd('followUser');
+}
+
+export async function unfollowUser(
+  userInfo: UserWithFollowingInfo,
+  myInfo: UserWithFollowingInfo
+) {
+  console.time('unfollowUser');
+  console.log('unfollowUser: called with userinfo, myinfo: ', userInfo, myInfo);
+  const { _id: userId, name: userName, followers: userFollowers } = userInfo;
+  const { _id: myId, following, name: myName } = myInfo;
+  // * userInfo: decrease followers count
+  const userInfoUpdateResult = await client //
+    .patch(userId)
+    .dec({ followers: userFollowers > 0 ? 1 : 0 })
+    .commit();
+  // * myInfo: following [] => remove her name or email
+  //
+  console.log('userInfoUpdateResult: ', userInfoUpdateResult);
+  const userIndex = following?.findIndex(
+    (followingUser) => followingUser === userName
+  );
+
+  if (userIndex === -1) {
+    console.log('there is no user in the followingList');
+    return;
+  }
+
+  const myInfoUpdateResult = await client //
+    .patch(myId)
+    .splice('following', userIndex, 1)
+    .commit();
+  console.log('myInfoUpdateResult: ', myInfoUpdateResult);
+
+  mutate(`allUsersWithFollowingInfo/${myName}`).then((res) => {
+    console.log('mutate allUsersWithFollowingInfo result: ', res);
+    console.log(`mutate(user/${userName}) called`);
+    console.log(`mutate(user/${myName}) called`);
+    mutate(`user/${userName}`);
+    mutate(`user/${myName}`);
+  });
+  console.timeEnd('unfollowUser');
 }
 
 export async function removePostIdFromUserInfo(
@@ -66,11 +181,17 @@ export async function removePostIdFromUserInfo(
   }
   mutate('posts');
   // mutate('userInfo');
-  mutate('allUsers').then((res) => {
+
+  mutate(`allUsersWithFollowingInfo/${name}`).then((res) => {
     console.log('mutate allUsers result: ', res);
     console.log(`mutate(user/${name}) called`);
     mutate(`user/${name}`);
   });
+  // mutate('allUsers').then((res) => {
+  //   console.log('mutate allUsers result: ', res);
+  //   console.log(`mutate(user/${name}) called`);
+  //   mutate(`user/${name}`);
+  // });
   console.timeEnd('removePostIdFromUserInfo');
   return;
 }
@@ -102,11 +223,17 @@ export async function addPostIdToUserInfo(
   console.timeEnd('addPostIdToUserInfo');
   mutate('posts');
   // mutate('userInfo');
-  mutate('allUsers').then((res) => {
+  mutate(`allUsersWithFollowingInfo/${name}`).then((res) => {
     console.log('mutate allUsers result: ', res);
     console.log(`mutate(user/${name}) called`);
     mutate(`user/${name}`);
   });
+
+  // mutate('allUsers').then((res) => {
+  //   console.log('mutate allUsers result: ', res);
+  //   console.log(`mutate(user/${name}) called`);
+  //   mutate(`user/${name}`);
+  // });
   return result;
 }
 
@@ -307,7 +434,7 @@ export async function getOrCreateUser(
     return;
   }
   const { name, image: avatarUrl, email } = session!.user!;
-  const emailName = email?.split('@')[0];
+  // const emailName = email?.split('@')[0];
   let res;
   try {
     res = await client.fetch(`*[_type == 'user' && name == '${name}']`);
@@ -320,7 +447,7 @@ export async function getOrCreateUser(
       _type: 'user',
       name,
       avatarUrl,
-      emailName,
+      emailName: email,
       followers: 0,
       following: [],
       marked: [],
