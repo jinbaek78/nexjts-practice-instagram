@@ -10,7 +10,6 @@ import useSWR from 'swr';
 export default function SearchPage() {
   const [query, setQuery] = useState('');
   const { data: allUsers } = useSWR('allUsers', () => getAllUsers());
-
   const results = query
     ? allUsers?.filter((user: User) => user.name.startsWith(query))
     : allUsers;

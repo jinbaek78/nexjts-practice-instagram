@@ -17,10 +17,7 @@ jest.mock('@/components/PostCard');
 
 describe('MarkedPosts', () => {
   const posts: Post[] = fakePosts;
-  const fakeUser1 = fakeUser[0];
-  const fakePost1 = posts[0];
-  const fakePosts2 = posts[1];
-  const markedPostIds = [fakePost1._id, fakePosts2._id];
+  const markedPostIds = fakePosts.map((post) => post._id);
 
   afterEach(() => {
     (GridLoader as jest.Mock).mockReset();

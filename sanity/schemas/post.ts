@@ -26,6 +26,11 @@ export default defineType({
       title: 'Author',
       type: 'string',
     }),
+    defineField({
+      name: 'authorAvatarUrl',
+      title: 'AuthorAvatarUrl',
+      type: 'string',
+    }),
 
     defineField({
       name: 'comments',
@@ -37,6 +42,7 @@ export default defineType({
           fields: [
             { type: 'string', name: 'username' },
             { type: 'string', name: 'comment' },
+            { type: 'string', name: 'userAvatarUrl' },
           ],
         }),
       ],

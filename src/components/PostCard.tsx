@@ -37,10 +37,11 @@ export default function PostCard({
     _id: postId,
     likes,
     imgUrl,
+    author,
+    authorAvatarUrl,
     comments,
     _createdAt,
     // user
-    avatarUrl,
     name: username,
     // made
     isLiked,
@@ -70,6 +71,7 @@ export default function PostCard({
     const newComment = {
       comment,
       username,
+      userAvatarUrl: session?.user?.image || '', //
       _key: uuidv4(),
     };
 
@@ -116,8 +118,8 @@ export default function PostCard({
       <form className="shadow-lg my-4 rounded-lg" onSubmit={handleSubmit}>
         {!isOnlyImage && (
           <div className="flex items-center p-2 rounded-md">
-            <Avatar src={avatarUrl} width={70} />
-            <p className="text-xl font-bold ml-2">{username}</p>
+            <Avatar src={authorAvatarUrl} width={70} />
+            <p className="text-xl font-bold ml-2">{author}</p>
           </div>
         )}
         <Image
@@ -232,21 +234,26 @@ export default function PostCard({
 
           <section className="basis-5/12 flex flex-col">
             <div className="flex items-center p-2 rounded-md border border-b-[3px] ">
-              <Avatar src={avatarUrl} width={60} />
-              <p className="text-xl font-bold ml-2">{username}</p>
+              <Avatar src={authorAvatarUrl} width={60} />
+              <p className="text-xl font-bold ml-2">{author}</p>
             </div>
             <ul className="p-5 flex-grow">
               {comments?.length &&
-                comments.map(({ comment, username }: Comment) => (
-                  <li
-                    key={uuidv4()}
-                    className="text-xl flex gap-2 items-center my-2"
-                  >
-                    <Avatar src={avatarUrl} width={40} />
-                    <h1 className="font-bold">{username}</h1>
-                    <p className="font-normal">{comment}</p>
-                  </li>
-                ))}
+                comments.map(
+                  ({ comment, username, userAvatarUrl }: Comment) => {
+                    const key = uuidv4();
+                    return (
+                      <li
+                        key={key}
+                        className="text-xl flex gap-2 items-center my-2"
+                      >
+                        <Avatar src={userAvatarUrl} width={40} />
+                        <h1 className="font-bold">{username}</h1>
+                        <p className="font-normal">{comment}</p>
+                      </li>
+                    );
+                  }
+                )}
             </ul>
 
             {session && (

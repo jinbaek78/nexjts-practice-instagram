@@ -46,35 +46,12 @@ describe('PostCard', () => {
   const fakePostGotOnlyOneComment = fakePost;
   const fakePostGotTwoComment = fakePosts[1];
   const fakeIndex = 0;
-  const FAKE_ID = 'fakeId';
-  const FAKE_KEY1 = 'fakeKey1';
-  const FAKE_KEY2 = 'fakeKey2';
-  const FAKE_KEY3 = 'fakeKey3';
-  const FAKE_KEY4 = 'fakeKey4';
-  const FAKE_KEY5 = 'fakeKey5';
-  const FAKE_KEY6 = 'fakeKey6';
-  const FAKE_KEY7 = 'fakeKey7';
-  const FAKE_KEY8 = 'fakeKey8';
-  const FAKE_KEY9 = 'fakeKey9';
-  const FAKE_KEY10 = 'fakeKey10';
-  const fakeKeys = [
-    FAKE_KEY1,
-    FAKE_KEY2,
-    FAKE_KEY3,
-    FAKE_KEY4,
-    FAKE_KEY5,
-    FAKE_KEY6,
-    FAKE_KEY7,
-    FAKE_KEY8,
-    FAKE_KEY9,
-    FAKE_KEY10,
-  ];
   const mockedOnUpdated = jest.fn();
 
   beforeEach(() => {
     uuidv4 as jest.Mock;
-    for (let i = 0; i < fakeKeys.length; i++) {
-      (uuidv4 as jest.Mock).mockReturnValueOnce(fakeKeys[i]);
+    for (let i = 0; i < 20; i++) {
+      (uuidv4 as jest.Mock).mockReturnValueOnce(`fakeKey${i}`);
     }
   });
 
@@ -95,12 +72,12 @@ describe('PostCard', () => {
   });
 
   it('should render with post details', () => {
-    // (uuidv4 as jest.Mock).mockImplementation(() => FAKE_ID);
     const {
       _id: postId,
       avatarUrl,
       imgUrl,
       name: username,
+      author,
       comments,
       _createdAt,
       isLiked,
@@ -120,7 +97,9 @@ describe('PostCard', () => {
     expect(Avatar).toHaveBeenCalledTimes(2 + fakePost.comments.length);
     const src = (screen.getByRole('img') as HTMLImageElement).src;
     expect(src).toMatch(fakePost.imgUrl.split('/')[1]);
-    expect(screen.getAllByText(username)).toHaveLength(2);
+
+    expect(screen.getAllByText(author)).toHaveLength(2);
+
     expect(screen.getAllByRole('listitem')).toHaveLength(
       fakePost.comments.length
     );
@@ -289,16 +268,14 @@ describe('PostCard', () => {
       const newComment = {
         comment,
         username,
-        // _key: FAKE_KEY3,
-        _key: FAKE_KEY3,
+        _key: 'fakeKey2',
+        userAvatarUrl: fakeSession.user?.image,
       };
       const updatedPost = {
         ...fakePost,
         comments: [...fakePost.comments, newComment],
       };
 
-      // await fireEvent.change(input, { target: { value: comment } });
-      // await fireEvent.click(submitButton);
       await userEvent.type(input, `${comment}{enter}`);
 
       expect(addCommentToPost).toHaveBeenCalledTimes(1);
@@ -330,7 +307,8 @@ describe('PostCard', () => {
       const newComment = {
         comment,
         username,
-        _key: FAKE_KEY6,
+        userAvatarUrl: fakeSession.user?.image,
+        _key: 'fakeKey15',
       };
       const updatedPost = {
         ...fakePost,
@@ -349,6 +327,10 @@ describe('PostCard', () => {
       );
       expect(mockedOnUpdated).toHaveBeenCalledTimes(1);
       expect(mockedOnUpdated).toHaveBeenCalledWith(fakeIndex, updatedPost);
+      expect(mockedOnUpdated).toHaveBeenCalledWith(fakeIndex, {
+        ...fakePost,
+        comments: [...fakePost.comments, newComment],
+      });
     });
   });
 
@@ -368,8 +350,8 @@ describe('PostCard', () => {
         expect(screen.getByRole('listitem')).toBeInTheDocument();
       });
 
+      // <form>1 + <dailog>1
       expect(screen.getAllByText(comment)).toHaveLength(2);
-      expect(screen.getAllByText(username)).toHaveLength(2);
       expect(screen.queryByText(`View all ${length} comments`)).toBeNull();
     });
 

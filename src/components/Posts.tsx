@@ -29,15 +29,17 @@ export default function Posts() {
         />
       )}
       {posts &&
-        posts?.map((post: Post, index: number) => (
-          <PostCard
-            key={post._id}
-            post={post}
-            index={index}
-            onUpdated={handlePostUpdateImmediately}
-            session={session}
-          />
-        ))}
+        posts?.map((post: Post, index: number) => {
+          return (
+            <PostCard
+              key={post._id}
+              post={post}
+              index={index}
+              onUpdated={handlePostUpdateImmediately}
+              session={session}
+            />
+          );
+        })}
     </div>
   );
 }

@@ -8,6 +8,16 @@ import { User } from '@/types/user';
 
 export type UserWithFollowingInfo = User & { isFollowing: boolean };
 
+// const testUserName = 'luna';
+// const testUserId = 'da4ce570-e85e-4133-909a-9cb6bde9022c';
+// const testUserAvatarImgUrl =
+//   'https://cdn.sanity.io/images/rfd2ipwe/instagram/7dd9fec2acac6a29f6abd4fd088762331e4e78dc-3304x4129.jpg';
+
+// const testUserName = 'jack';
+// const testUserId = '3c11ae6c-dfba-4e00-ad22-4ce342a29024';
+// const testUserAvatarImgUrl =
+//   'https://cdn.sanity.io/images/rfd2ipwe/instagram/c5e28dc48f489c0a9efc2a34765d5241d7e5ad8e-4000x6000.jpg';
+
 export async function getUserByName(
   allUsers: UserWithFollowingInfo[] | undefined,
   name: string | null | undefined
@@ -44,7 +54,6 @@ export async function getAllUsersWithFollowingInfo(session: Session | null) {
   const userInfo: User | undefined = allUsers.find(
     (user: User) => user?.emailName === userEmail
   );
-  console.log('getAllUsersWithFollowingInfo: found user info: ', userInfo);
   const result: UserWithFollowingInfo[] = [];
   const followingList = userInfo?.following;
 
@@ -59,6 +68,7 @@ export async function getAllUsersWithFollowingInfo(session: Session | null) {
     result.push(userWithFollowingInfo);
   }
   console.timeEnd('getAllUsersWithFollowingInfo');
+  console.log('getAllUsersWithFollowingInfo: result: ', result);
   return result;
 }
 
@@ -207,7 +217,9 @@ export async function addPostIdToUserInfo(
   name;
   console.log('addPostIdToUserInfo args: ', postId, userId);
   const result = await client //
+    // 📌
     .patch(userId)
+    // .patch(testUserId)
     .insert('after', `${type}[-1]`, [postId])
     // .set({ posts: [] })
     // .set({ liked: [] })
@@ -222,11 +234,16 @@ export async function addPostIdToUserInfo(
   console.log('addPostIdToUserInfo result :', result);
   console.timeEnd('addPostIdToUserInfo');
   mutate('posts');
-  // mutate('userInfo');
+
   mutate(`allUsersWithFollowingInfo/${name}`).then((res) => {
     console.log('mutate allUsers result: ', res);
     console.log(`mutate(user/${name}) called`);
     mutate(`user/${name}`);
+    //  📌
+    // mutate(`allUsersWithFollowingInfo/${name}`).then((res) => {
+    //   console.log('mutate allUsers result: ', res);
+    //   console.log(`mutate(user/${name}) called`);
+    //   mutate(`user/${name}`);
   });
 
   // mutate('allUsers').then((res) => {
@@ -268,7 +285,7 @@ export async function addCommentToPost(
   callback: () => void
 ) {
   console.time('addCommentToPost');
-  console.log('newComment: ', newComment);
+  console.log('addCommentToPost: newComment: ', newComment);
   callback();
   await client //
     .patch(postId)
@@ -283,6 +300,7 @@ export async function addCommentToPost(
 
 export async function getPostsById(ids: string[], userInfo: User) {
   // console.log('getPostsById called with ids, userInfo: ', ids, userInfo);
+  console.log('getPostsById: call with ids, userinfo: ', ids, userInfo);
   if (!ids || !userInfo) {
     console.log('there is no ids or userInfo');
     return;
@@ -291,6 +309,8 @@ export async function getPostsById(ids: string[], userInfo: User) {
   const posts: NewPost[] = [];
   const result = [];
   const { marked, liked } = userInfo;
+  console.log('getPostsById:  marked, liked:  ', marked, liked);
+
   try {
     //
     for (let i = 0; i < ids.length; i++) {
@@ -306,8 +326,8 @@ export async function getPostsById(ids: string[], userInfo: User) {
   }
 
   for (let i = 0; i < posts.length; i++) {
-    const isLiked = liked.includes(posts[i]._id);
-    const isMarked = marked.includes(posts[i]._id);
+    const isLiked = liked?.includes(posts[i]._id);
+    const isMarked = marked?.includes(posts[i]._id);
     // user name and info will be modified into fetching query ( fetch('*[_type == 'user' && name == '${author}'))
     result.push({
       ...posts[i],
@@ -330,44 +350,47 @@ export async function getPosts(session: Session | null) {
   if (!session) {
     return;
   }
+  console.time('getPosts');
 
-  const result = [];
-  const posts: NewPost[] = [];
-  // 📌 to be updated =>
-  //  scenario1. using fetch
-  // `*[_type == 'post' && author == '${UserInfo[0].name or UserInfo[0].following[i].name}']
-  //  scenario2. using custom method for performance
-  // 1. in all posts, author === session.users.name
-  // 2. in all posts, author === UserInfo[0].following[i].name ..
-  // 3. sort by time (newest order)
+  const userInfo = (await getOrCreateUser(session))[0] as User;
+  const { liked, marked, name, _id, following, avatarUrl } = userInfo;
+  const toBeFetchedList = [userInfo.name, ...following];
+  const grouqQueyNames = [];
+  const result: PostType[] = [];
+  let posts: NewPost[];
+
+  for (let i = 0; i < toBeFetchedList.length; i++) {
+    grouqQueyNames.push(`author == '${toBeFetchedList[i]}'`);
+  }
+
   try {
-    posts.push(...(await client.fetch(`*[_type == 'post']`)));
+    posts = await client.fetch(
+      `*[_type == 'post' && ( ${grouqQueyNames.join(' || ')} )]`
+    );
+
+    for (let i = 0; i < posts.length; i++) {
+      const isLiked = liked.includes(posts[i]._id);
+      const isMarked = marked.includes(posts[i]._id);
+      result.push({
+        avatarUrl,
+        ...posts[i],
+        isLiked,
+        isMarked,
+        name,
+        userId: _id,
+        marked,
+        liked,
+      });
+    }
   } catch (error) {
-    console.log('got error: ', error);
     console.error(error);
   }
-  // 🐛
-  const userInfo = (await getOrCreateUser(session))[0] as User;
-  const { liked, marked, name, avatarUrl, _id } = userInfo;
-  //
 
-  for (let i = 0; i < posts.length; i++) {
-    const isLiked = liked.includes(posts[i]._id);
-    const isMarked = marked.includes(posts[i]._id);
-    // user name and info will be modified into fetching query ( fetch('*[_type == 'user' && name == '${author}'))
-    result.push({
-      ...posts[i],
-      isLiked,
-      isMarked,
-      name,
-      avatarUrl,
-      userId: _id,
-      marked,
-      liked,
-    });
-  }
-  console.log('getPosts raw post:  ', posts);
-  console.log('getPosts: added posts: ', result);
+  // descending
+  result.sort((a, b) => Date.parse(b._createdAt) - Date.parse(a._createdAt));
+  // ascending
+  // result.sort((a, b) => Date.parse(a._createdAt) - Date.parse(b._createdAt));
+  console.timeEnd('sorting');
   console.timeEnd('getPosts');
   return result;
 }
@@ -493,15 +516,40 @@ export async function publishPost({
   const post = {
     _type: 'post',
     //
+    // 📌
     author: session?.user?.name,
+    // author: testUserName,
+    // 📌
+    authorAvatarUrl: session?.user?.image,
+    // authorAvatarUrl: testUserAvatarImgUrl,
     imgUrl: imgUrl,
     imgAssetId: imgAssetId,
     //
     likes: 0,
+    // 📌
     comments:
       comment !== ''
-        ? [{ username: session.user?.name, comment, _key: uuidv4() }]
+        ? [
+            {
+              username: session?.user?.name,
+              comment,
+              userAvatarUrl: session?.user?.image,
+              _key: uuidv4(),
+            },
+          ]
         : [],
+
+    // comments:
+    //   comment !== ''
+    //     ? [
+    //         {
+    //           username: testUserName,
+    //           comment,
+    //           userAvatarUrl: testUserAvatarImgUrl,
+    //           _key: uuidv4(),
+    //         },
+    //       ]
+    //     : [],
   };
 
   let newPost;
@@ -511,13 +559,18 @@ export async function publishPost({
     console.error(error);
   }
 
-  // 🐛 in userinfo, posts=[userId, userId, userId]...
+  console.log('created newPost: ', newPost);
+
   const userInfo = (await getOrCreateUser(session))?.[0];
-  const { _id: userId, name } = userInfo as User;
-  const { _id, likes } = newPost as NewPost;
+  const { _id: userId, name, avatarUrl } = userInfo as User;
+  const { _id, likes } = newPost as unknown as NewPost;
   const postInfo = {
+    // 📌
     name,
+    // name: testUserName,
+    // 📌
     userId,
+    // userId: testUserId,
     _id,
     likes,
   };

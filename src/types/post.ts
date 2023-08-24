@@ -12,6 +12,7 @@ export type Post = NewPost & {
 
 export type NewPost = {
   author: string;
+  authorAvatarUrl: string;
   likes: number;
   comments: Comment[];
   imgAssetId: string;
@@ -26,6 +27,7 @@ export type NewPost = {
 export type Comment = {
   username: string;
   comment: string;
+  userAvatarUrl: string;
 };
 
 export type PostOption = 'saved' | 'liked' | 'posts';

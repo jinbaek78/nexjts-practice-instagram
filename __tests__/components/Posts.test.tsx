@@ -50,7 +50,7 @@ describe('Posts', () => {
       expect(screen.getAllByRole('listitem')).toHaveLength(fakePosts.length);
     });
 
-    expect(PostCard).toHaveBeenCalledTimes(2);
+    expect(PostCard).toHaveBeenCalledTimes(fakePosts.length);
     expect((PostCard as jest.Mock).mock.calls[0][0].index).toBe(0);
     expect((PostCard as jest.Mock).mock.calls[1][0].index).toBe(1);
     expect((PostCard as jest.Mock).mock.calls[0][0].post).toEqual(fakePosts[0]);
