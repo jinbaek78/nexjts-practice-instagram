@@ -15,3 +15,5 @@ export type User = {
   _type: string;
   _updatedAt?: string;
 };
+
+export type UserWithFollowingInfo = User & { isFollowing: boolean };
